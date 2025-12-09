@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Estudante - DevLab{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="text-white mb-2">
+            <strong>👨‍🎓 Meu Dashboard</strong>
+        </h1>
+        <p class="text-white-50">Bem-vindo, {{ user.get_full_name|default:user.username }}! Acompanhe sua participação no DevLab.</p>
+    </div>
+</div>
+
+<!-- Estatísticas -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h1 class="display-4 text-primary mb-0">{{ meus_projetos.count }}</h1>
+                <p class="text-muted mb-0">Projetos</p>
+                <small class="text-muted">Participando ativamente</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <h1 class="display-4 text-success mb-0">{{ minhas_equipes.count }}</h1>
+                <p class="text-muted mb-0">Equipes</p>
+                <small class="text-muted">Membro ativo</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                {% if equipe_liderada %}
+                    <h1 class="display-4 text-warning mb-0">👑</h1>
+                    <p class="text-muted mb-0">Líder de Equipe</p>
+                    <small class="text-success">{{ equipe_liderada.nome }}</small>
+                {% else %}
+                    <h1 class="display-4 text-muted mb-0">-</h1>
+                    <p class="text-muted mb-0">Membro</p>
+                    <small class="text-muted">Sem liderança</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Equipe Liderada (se houver) -->
+{% if equipe_liderada %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0 text-dark">👑 Equipe sob sua Liderança</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="mb-2">{{ equipe_liderada.nome }}</h4>
+                        <p class="mb-2"><strong>Projeto:</strong> {{ equipe_liderada.projeto.titulo }}</p>
+                        <p class="mb-2"><strong>Membros:</strong> {{ equipe_liderada.total_membros }}</p>
+                        <p class="mb-0 text-muted">{{ equipe_liderada.descricao|default:"Sem descrição" }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{% url 'equipe_detalhes' equipe_liderada.pk %}" class="btn btn-warning">
+                            Ver Detalhes da Equipe
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Meus Projetos -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">📊 Meus Projetos</h5>
+            </div>
+            <div class="card-body">
+                {% if meus_projetos %}
+                    <div class="list-group">
+                        {% for projeto in meus_projetos %}
+                        <a href="{% url 'projeto_detalhes' projeto.pk %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">{{ projeto.titulo }}</h6>
+                                <span class="badge bg-{% if projeto.status == 'concluido' %}success{% elif projeto.status == 'andamento' %}warning{% else %}secondary{% endif %}">
+                                    {{ projeto.get_status_display }}
+                                </span>
+                            </div>
+                            <p class="mb-1 text-muted"><small>{{ projeto.descricao|truncatewords:12 }}</small></p>
+                            <small class="text-muted">
+                                <strong>Cliente:</strong> {{ projeto.cliente }}<br>
+                                <strong>Início:</strong> {{ projeto.data_inicio|date:"d/m/Y" }}
+                            </small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'projeto_lista' %}" class="btn btn-sm btn-outline-primary">
+                            Ver Todos Meus Projetos
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h5 class="text-muted">📭</h5>
+                        <p class="text-muted">Você ainda não está participando de nenhum projeto</p>
+                        <small class="text-muted">Entre em contato com o coordenador ou professor orientador para ser adicionado a um projeto</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Minhas Equipes -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">👥 Minhas Equipes</h5>
+            </div>
+            <div class="card-body">
+                {% if minhas_equipes %}
+                    <div class="list-group">
+                        {% for equipe in minhas_equipes %}
+                        <a href="{% url 'equipe_detalhes' equipe.pk %}" 
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">
+                                    {{ equipe.nome }}
+                                    {% if equipe.lider == user %}
+                                        <span class="badge bg-warning text-dark">👑 Líder</span>
+                                    {% endif %}
+                                </h6>
+                                <span class="badge bg-info">{{ equipe.total_membros }} membros</span>
+                            </div>
+                            <small class="text-muted">
+                                <strong>Projeto:</strong> {{ equipe.projeto.titulo }}<br>
+                                <strong>Líder:</strong> {{ equipe.lider.get_full_name|default:equipe.lider.username|default:"Não definido" }}
+                            </small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'equipe_lista' %}" class="btn btn-sm btn-outline-success">
+                            Ver Todas Minhas Equipes
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <h5 class="text-muted">👤</h5>
+                        <p class="text-muted">Você não está em nenhuma equipe ainda</p>
+                        <small class="text-muted">Participe de um projeto para ser adicionado a uma equipe</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Todos os Projetos do DevLab -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">🔍 Outros Projetos do DevLab</h5>
+                <small class="text-muted">Explore os projetos em andamento</small>
+            </div>
+            <div class="card-body">
+                {% if todos_projetos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Projeto</th>
+                                    <th>Status</th>
+                                    <th>Participantes</th>
+                                    <th>Equipes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for projeto in todos_projetos %}
+                                <tr {% if projeto in meus_projetos %}class="table-primary"{% endif %}>
+                                    <td>
+                                        <strong>{{ projeto.titulo }}</strong>
+                                        {% if projeto in meus_projetos %}
+                                            <span class="badge bg-primary ms-2">Você participa ✓</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if projeto.status == 'concluido' %}success{% elif projeto.status == 'andamento' %}warning{% else %}secondary{% endif %}">
+                                            {{ projeto.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if projeto in meus_projetos %}
+                                            <a href="{% url 'projeto_detalhes' projeto.pk %}">
+                                                {{ projeto.total_participantes }} participantes
+                                            </a>
+                                        {% else %}
+                                            {{ projeto.total_participantes }} participantes
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ projeto.total_equipes }} equipes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-5">Nenhum projeto disponível no momento</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dica -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <strong>💡 Dica:</strong> Você pode ver detalhes completos e informações de contato apenas dos projetos e equipes em que participa. 
+            Para outros projetos, apenas informações básicas (nome e quantidade) estão disponíveis por questões de privacidade.
+        </div>
+    </div>
+</div>
+{% endblock %}

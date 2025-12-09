@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Equipes - DevLab{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="text-white mb-0">Equipes</h2>
+                <p class="text-white-50">Gerencie as equipes dos projetos</p>
+            </div>
+            {% if user.tipo == 'coordenador' %}
+            <a href="{% url 'equipe_criar' %}" class="btn btn-light">
+                <strong>+ Nova Equipe</strong>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if equipes %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Projeto</th>
+                        <th>Líder</th>
+                        <th>Membros</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equipe in equipes %}
+                    <tr>
+                        <td>
+                            <strong>{{ equipe.nome }}</strong>
+                        </td>
+                        <td>
+                            <a href="{% url 'projeto_detalhes' equipe.projeto.pk %}">
+                                {{ equipe.projeto.titulo }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if equipe.lider %}
+                                {{ equipe.lider.get_full_name|default:equipe.lider.username }}
+                                {% if equipe.lider == user %}
+                                    <span class="badge bg-warning text-dark">Você</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Não definido</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ equipe.total_membros }} membros</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'equipe_detalhes' equipe.pk %}" class="btn btn-sm btn-info">
+                                Ver Detalhes
+                            </a>
+                            {% if user.tipo == 'coordenador' %}
+                            <a href="{% url 'equipe_editar' equipe.pk %}" class="btn btn-sm btn-warning">
+                                Editar
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <h3 class="text-muted">Nenhuma equipe encontrada</h3>
+            {% if user.tipo == 'coordenador' %}
+            <p class="text-muted">Comece criando uma nova equipe</p>
+            <a href="{% url 'equipe_criar' %}" class="btn btn-primary">Criar Primeira Equipe</a>
+            {% else %}
+            <p class="text-muted">Você ainda não faz parte de nenhuma equipe</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

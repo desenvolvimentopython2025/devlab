@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevLab Projects - Projetos Públicos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .hero {
+            padding: 80px 0;
+            color: white;
+            text-align: center;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .btn-login {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 30px;
+            font-weight: bold;
+            border-radius: 25px;
+        }
+        .btn-login:hover {
+            background: #f0f0f0;
+            color: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-3">DevLab Projects</h1>
+            <p class="lead mb-4">Sistema de Gestão de Projetos Colaborativos</p>
+            <a href="{% url 'login' %}" class="btn btn-login btn-lg">Fazer Login</a>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Projetos do DevLab</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if projetos %}
+                            <div class="row">
+                                {% for projeto in projetos %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ projeto.titulo }}</h5>
+                                            <p class="card-text">{{ projeto.descricao|truncatewords:20 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-{{ projeto.status|yesno:'success,warning,secondary' }}">
+                                                    {{ projeto.get_status_display }}
+                                                </span>
+                                                <small class="text-muted">
+                                                    {{ projeto.total_participantes }} participantes | 
+                                                    {{ projeto.total_equipes }} equipes
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <small class="text-muted">
+                                                <strong>Cliente:</strong> {{ projeto.cliente }}<br>
+                                                <strong>Início:</strong> {{ projeto.data_inicio|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-center text-muted py-5">
+                                Nenhum projeto disponível no momento
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Quer fazer parte do DevLab?</h5>
+                    <p class="text-muted">Entre em contato com a coordenação para criar sua conta</p>
+                    <a href="{% url 'login' %}" class="btn btn-primary">Ir para Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

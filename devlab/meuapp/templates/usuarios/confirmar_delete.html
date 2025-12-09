@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">Confirmar Exclusão</h5>
+            </div>
+            <div class="card-body">
+                <p>Tem certeza que deseja deletar o usuário <strong>{{ usuario.get_full_name|default:usuario.username }}</strong>?</p>
+                <p class="text-muted">
+                    Tipo: {{ usuario.get_tipo_display }}<br>
+                    Username: {{ usuario.username }}
+                </p>
+                <p class="text-danger">Esta ação não pode ser desfeita e removerá o usuário de todos os projetos e equipes!</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'usuario_lista' %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-danger">Sim, Deletar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

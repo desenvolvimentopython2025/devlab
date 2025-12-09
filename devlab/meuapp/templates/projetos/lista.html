@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 class="text-white">Projetos</h2>
+            {% if user.tipo == 'coordenador' %}
+            <a href="{% url 'projeto_criar' %}" class="btn btn-light">
+                + Novo Projeto
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if projetos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Cliente</th>
+                        <th>Status</th>
+                        <th>Início</th>
+                        <th>Participantes</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for projeto in projetos %}
+                    <tr>
+                        <td><strong>{{ projeto.titulo }}</strong></td>
+                        <td>{{ projeto.cliente }}</td>
+                        <td>
+                            <span class="badge bg-{{ projeto.status|yesno:'success,warning,secondary' }}">
+                                {{ projeto.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ projeto.data_inicio|date:"d/m/Y" }}</td>
+                        <td>{{ projeto.total_participantes }}</td>
+                        <td>
+                            <a href="{% url 'projeto_detalhes' projeto.pk %}" class="btn btn-sm btn-info">
+                                Ver
+                            </a>
+                            {% if user.tipo == 'coordenador' %}
+                            <a href="{% url 'projeto_editar' projeto.pk %}" class="btn btn-sm btn-warning">
+                                Editar
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted py-5">Nenhum projeto encontrado</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

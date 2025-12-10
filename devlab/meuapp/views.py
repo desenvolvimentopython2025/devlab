@@ -442,6 +442,18 @@ def usuario_deletar(request, pk):
 # VIEW PÚBLICA
 # ============================================================
 
+def home(request):
+    """Página inicial pública com opção de login e contato da coordenação."""
+    coordenacao = {
+        'nome': 'Coordenação de Projetos',
+        'email': 'coordenacao@example.edu.br',
+        'telefone': '+55 (61) 99999-0000',
+        'local': 'Bloco A, Sala 101',
+        'horario': 'Seg–Sex 09:00–17:00',
+    }
+
+    return render(request, 'home.html', {'coordenacao': coordenacao})
+
 def visitante_view(request):
     """View pública para visitantes"""
     projetos = Projeto.objects.all()

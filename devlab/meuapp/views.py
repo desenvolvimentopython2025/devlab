@@ -466,3 +466,13 @@ def visitante_view(request):
         'total_equipes': total_equipes,
     }
     return render(request, 'visitantes.html', context)
+# ============================================================
+ #Teste botão conta
+@login_required
+def perfil (request):
+    """Exibe o perfil do usuário logado"""
+    user = request.user
+    return render(request, 'perfil.html', {'user': user})
+
+
+

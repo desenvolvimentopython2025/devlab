@@ -118,3 +118,7 @@ AUTH_USER_MODEL = 'meuapp.Usuario'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
+ 
+# Email (desenvolvimento): imprime emails no console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'no-reply@devlab.local'

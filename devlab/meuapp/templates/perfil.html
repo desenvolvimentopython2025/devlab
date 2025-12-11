@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Meu Perfil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .info-box {
+            margin-bottom: 15px;
+        }
+
+        .info-box strong {
+            color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .tipo {
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Meu Perfil</h2>
+
+    <div class="info-box">
+        <strong>Nome:</strong> {{ user.get_full_name }}
+    </div>
+
+    <div class="info-box">
+        <strong>Usuário:</strong> {{ user.username }}
+    </div>
+
+    <div class="info-box">
+        <strong>Email:</strong> {{ user.email }}
+    </div>
+
+    <div class="info-box">
+        <strong>Tipo:</strong>
+        <span class="tipo">{{ user.get_tipo_display }}</span>
+    </div>
+
+    {% if user.matricula %}
+    <div class="info-box">
+        <strong>Matrícula:</strong> {{ user.matricula }}
+    </div>
+    {% endif %}
+
+    {% if user.cpf %}
+    <div class="info-box">
+        <strong>CPF:</strong> {{ user.cpf }}
+    </div>
+    {% endif %}
+
+    {% if user.data_nascimento %}
+    <div class="info-box">
+        <strong>Data de Nascimento:</strong> {{ user.data_nascimento|date:"d/m/Y" }}
+    </div>
+    {% endif %}
+
+    {% if user.curso %}
+    <div class="info-box">
+        <strong>Curso:</strong> {{ user.curso }}
+    </div>
+    {% endif %}
+
+    <a href="{% url 'dashboard' %}" class="btn">Voltar ao Dashboard</a>
+
+</div>
+
+</body>
+</html>

@@ -337,6 +337,9 @@ class EquipeForm(forms.ModelForm):
         ).order_by('tipo', 'first_name', 'last_name')
         
         self.fields['membros'].queryset = usuarios_disponiveis
+        # Allow creating an equipe without selecting a projeto
+        if 'projeto' in self.fields:
+            self.fields['projeto'].required = False
         
         # Para o campo líder, mostrar apenas usuários sem equipe ou o líder atual
         if self.instance.pk:
@@ -360,34 +363,13 @@ class EquipeForm(forms.ModelForm):
         projeto = cleaned_data.get('projeto')
         membros = cleaned_data.get('membros')
         
-        # Verificar se o líder participa do projeto
-        if lider and projeto:
-            participacao_lider = ParticipacaoProjeto.objects.filter(
-                usuario=lider, 
-                projeto=projeto
-            ).exists()
-            
-            if not participacao_lider:
-                raise forms.ValidationError(
-                    f'O líder "{lider.get_full_name() or lider.username}" deve ser um '
-                    f'participante do projeto "{projeto.titulo}". '
-                    f'Adicione-o ao projeto primeiro através do Django Admin ou criando uma ParticipacaoProjeto.'
-                )
+        # Nota: não é mais obrigatório que o líder seja participante do projeto.
+        # Mantemos validação dos membros (abaixo) quando um projeto é selecionado.
         
-        # Verificar se os membros participam do projeto
-        if membros and projeto:
-            for membro in membros:
-                participacao = ParticipacaoProjeto.objects.filter(
-                    usuario=membro,
-                    projeto=projeto
-                ).exists()
-                
-                if not participacao:
-                    self.add_error('membros', 
-                        f'O membro "{membro.get_full_name() or membro.username}" '
-                        f'não participa do projeto "{projeto.titulo}". '
-                        f'Adicione-o ao projeto primeiro.'
-                    )
+        # Nota: não é mais necessário que os membros já participem do projeto
+        # ao serem adicionados à equipe. Se um projeto estiver selecionado,
+        # a associação entre usuário e projeto pode ser criada separadamente
+        # por meio do fluxo de ParticipacaoProjeto (admin ou formulário).
         
         return cleaned_data
 

@@ -195,7 +195,8 @@ def projeto_detalhes(request, pk):
         detalhes_completos = False
     
     equipes = projeto.equipes.all()
-    participantes = projeto.participantes.all()
+    # participantes agora são todos os membros das equipes associadas ao projeto
+    participantes = projeto.membros_por_equipes()
     
     context = {
         'projeto': projeto,
@@ -460,10 +461,19 @@ def visitante_view(request):
     total_projetos = projetos.count()
     total_equipes = Equipe.objects.count()
     
+    coordenacao = {
+        'nome': 'Coordenação de Projetos',
+        'email': 'coordenacao@example.edu.br',
+        'telefone': '+55 (61) 99999-0000',
+        'local': 'Bloco A, Sala 101',
+        'horario': 'Seg–Sex 09:00–17:00',
+    }
+
     context = {
         'projetos': projetos,
         'total_projetos': total_projetos,
         'total_equipes': total_equipes,
+        'coordenacao': coordenacao,
     }
     return render(request, 'visitantes.html', context)
 # ============================================================

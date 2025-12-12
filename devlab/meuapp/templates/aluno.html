@@ -61,7 +61,13 @@
                 <div class="row">
                     <div class="col-md-8">
                         <h4 class="mb-2">{{ equipe_liderada.nome }}</h4>
-                        <p class="mb-2"><strong>Projeto:</strong> {{ equipe_liderada.projeto.titulo }}</p>
+                        <p class="mb-2"><strong>Projeto:</strong>
+                            {% if equipe_liderada.projeto %}
+                                {{ equipe_liderada.projeto.titulo }}
+                            {% else %}
+                                <span class="text-muted">Sem projeto</span>
+                            {% endif %}
+                        </p>
                         <p class="mb-2"><strong>Membros:</strong> {{ equipe_liderada.total_membros }}</p>
                         <p class="mb-0 text-muted">{{ equipe_liderada.descricao|default:"Sem descrição" }}</p>
                     </div>
@@ -142,8 +148,19 @@
                                 <span class="badge bg-info">{{ equipe.total_membros }} membros</span>
                             </div>
                             <small class="text-muted">
-                                <strong>Projeto:</strong> {{ equipe.projeto.titulo }}<br>
-                                <strong>Líder:</strong> {{ equipe.lider.get_full_name|default:equipe.lider.username|default:"Não definido" }}
+                                <strong>Projeto:</strong>
+                                {% if equipe.projeto %}
+                                    {{ equipe.projeto.titulo }}
+                                {% else %}
+                                    <span class="text-muted">Sem projeto</span>
+                                {% endif %}
+                                <br>
+                                <strong>Líder:</strong>
+                                {% if equipe.lider %}
+                                    {{ equipe.lider.get_full_name|default:equipe.lider.username }}
+                                {% else %}
+                                    <span class="text-muted">Não definido</span>
+                                {% endif %}
                             </small>
                         </a>
                         {% endfor %}

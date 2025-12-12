@@ -33,9 +33,13 @@
             </div>
             <div class="col-md-6">
                 <p><strong>Projeto:</strong><br>
+                    {% if equipe.projeto %}
                     <a href="{% url 'projeto_detalhes' equipe.projeto.pk %}" class="btn btn-sm btn-outline-primary">
                         {{ equipe.projeto.titulo }}
                     </a>
+                    {% else %}
+                    <span class="text-muted">Sem projeto</span>
+                    {% endif %}
                 </p>
                 <p><strong>Líder:</strong><br>
                     {% if equipe.lider %}

@@ -40,9 +40,13 @@
                             <strong>{{ equipe.nome }}</strong>
                         </td>
                         <td>
+                            {% if equipe.projeto %}
                             <a href="{% url 'projeto_detalhes' equipe.projeto.pk %}">
                                 {{ equipe.projeto.titulo }}
                             </a>
+                            {% else %}
+                            <span class="text-muted">Sem projeto</span>
+                            {% endif %}
                         </td>
                         <td>
                             {% if equipe.lider %}
@@ -64,6 +68,9 @@
                             {% if user.tipo == 'coordenador' %}
                             <a href="{% url 'equipe_editar' equipe.pk %}" class="btn btn-sm btn-warning">
                                 Editar
+                            </a>
+                            <a href="{% url 'equipe_deletar' equipe.pk %}" class="btn btn-sm btn-danger">
+                                Deletar
                             </a>
                             {% endif %}
                         </td>

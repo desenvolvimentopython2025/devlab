@@ -17,8 +17,20 @@
                 </div>
 
                 <div class="mb-3">
-                    <p><strong>Projeto:</strong> {{ equipe.projeto.titulo }}</p>
-                    <p><strong>Líder:</strong> {{ equipe.lider.get_full_name|default:equipe.lider.username|default:"Não definido" }}</p>
+                    <p><strong>Projeto:</strong>
+                        {% if equipe.projeto %}
+                            {{ equipe.projeto.titulo }}
+                        {% else %}
+                            <span class="text-muted">Sem projeto</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Líder:</strong>
+                        {% if equipe.lider %}
+                            {{ equipe.lider.get_full_name|default:equipe.lider.username }}
+                        {% else %}
+                            <span class="text-muted">Não definido</span>
+                        {% endif %}
+                    </p>
                     <p><strong>Membros:</strong> {{ equipe.total_membros }}</p>
                     <p><strong>Criada em:</strong> {{ equipe.criada_em|date:"d/m/Y H:i" }}</p>
                 </div>

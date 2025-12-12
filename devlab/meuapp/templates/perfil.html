@@ -102,6 +102,25 @@
     </div>
     {% endif %}
 
+    <h3 style="margin-top:20px">Alterar senha</h3>
+    <form method="post" action="{% url 'perfil' %}">
+        {% csrf_token %}
+        <div class="info-box">
+            <label for="id_old_password"><strong>Senha atual</strong></label>
+            <input type="password" name="old_password" id="id_old_password" class="form-control" required />
+        </div>
+        <div class="info-box">
+            <label for="id_new_password1"><strong>Nova senha</strong></label>
+            <input type="password" name="new_password1" id="id_new_password1" class="form-control" required />
+        </div>
+        <div class="info-box">
+            <label for="id_new_password2"><strong>Confirmar nova senha</strong></label>
+            <input type="password" name="new_password2" id="id_new_password2" class="form-control" required />
+        </div>
+        <button type="submit" class="btn">Alterar senha</button>
+
+    </form>
+
     <a href="{% url 'dashboard' %}" class="btn">Voltar ao Dashboard</a>
 
 </div>

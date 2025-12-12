@@ -82,13 +82,16 @@
                         <p class="mb-1">
                             <span class="badge bg-primary">{{ membro.get_tipo_display }}</span>
                         </p>
-                        {% if membro.matricula %}
-                        <small class="text-muted d-block">Matrícula: {{ membro.matricula }}</small>
-                        {% endif %}
-                        {% if membro.email %}
-                        <small class="text-muted d-block">
-                            <a href="mailto:{{ membro.email }}">{{ membro.email }}</a>
-                        </small>
+                        {% comment %}Don't show other users' email or matricula to estudantes{% endcomment %}
+                        {% if user.tipo != 'estudante' or membro == user %}
+                            {% if membro.matricula %}
+                            <small class="text-muted d-block">Matrícula: {{ membro.matricula }}</small>
+                            {% endif %}
+                            {% if membro.email %}
+                            <small class="text-muted d-block">
+                                <a href="mailto:{{ membro.email }}">{{ membro.email }}</a>
+                            </small>
+                            {% endif %}
                         {% endif %}
                         {% if membro.curso %}
                         <small class="text-muted d-block">{{ membro.curso }}</small>

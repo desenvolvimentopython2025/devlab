@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.db.models import Q, Count
 from .models import Usuario, Projeto, Equipe, ParticipacaoProjeto
 from .forms import (
@@ -142,7 +145,10 @@ def professor_dashboard(request):
 def estudante_dashboard(request):
     """Dashboard do estudante"""
     # Projetos e equipes do estudante
-    meus_projetos = request.user.projetos_participando.all()
+    # Inclui projetos em que o usuário tenha ParticipacaoProjeto OU pertença a uma equipe
+    projetos_via_participacao = request.user.projetos_participando.all()
+    projetos_via_equipes = Projeto.objects.filter(equipes__membros=request.user)
+    meus_projetos = (projetos_via_participacao | projetos_via_equipes).distinct()
     minhas_equipes = request.user.equipes_participando.all()
     equipe_liderada = getattr(request.user, 'equipe_liderada', None)
     
@@ -165,11 +171,9 @@ def estudante_dashboard(request):
 @login_required
 def projeto_lista(request):
     """Lista todos os projetos (coordenador) ou projetos do usuário"""
-    if request.user.tipo == 'coordenador':
-        projetos = Projeto.objects.all()
-    else:
-        # Professores e estudantes veem seus projetos
-        projetos = request.user.projetos_participando.all()
+    # Coordenador vê todos; professores e estudantes também poderão ver todos os projetos
+    # (detalhes completos continuam restritos em projeto_detalhes)
+    projetos = Projeto.objects.all()
     
     # Busca
     query = request.GET.get('q')
@@ -267,10 +271,8 @@ def projeto_deletar(request, pk):
 @login_required
 def equipe_lista(request):
     """Lista todas as equipes (coordenador) ou equipes do usuário"""
-    if request.user.tipo == 'coordenador':
-        equipes = Equipe.objects.all()
-    else:
-        equipes = request.user.equipes_participando.all()
+    # Coordenador vê todas; professores e estudantes também poderão ver todas as equipes
+    equipes = Equipe.objects.all()
     
     # Busca
     query = request.GET.get('q')
@@ -482,6 +484,37 @@ def visitante_view(request):
 def perfil (request):
     """Exibe o perfil do usuário logado"""
     user = request.user
+
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password1 = request.POST.get('new_password1')
+        new_password2 = request.POST.get('new_password2')
+
+        # Verifica senha atual
+        if not user.check_password(old_password):
+            messages.error(request, 'Senha atual incorreta.')
+            return render(request, 'perfil.html', {'user': user})
+
+        # Verifica coincidência das novas senhas
+        if new_password1 != new_password2:
+            messages.error(request, 'As senhas novas não coincidem.')
+            return render(request, 'perfil.html', {'user': user})
+
+        # Validação de força de senha
+        try:
+            validate_password(new_password1, user)
+        except ValidationError as e:
+            for msg in e.messages:
+                messages.error(request, msg)
+            return render(request, 'perfil.html', {'user': user})
+
+        # Tudo ok: altera a senha e atualiza sessão
+        user.set_password(new_password1)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Senha alterada com sucesso.')
+        return redirect('perfil')
+
     return render(request, 'perfil.html', {'user': user})
 
 

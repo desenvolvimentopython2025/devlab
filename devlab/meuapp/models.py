@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+import random
+import string
 
 class Usuario(AbstractUser):
     """Modelo de usuário customizado para o sistema DevLab"""
@@ -118,3 +120,46 @@ class Equipe(models.Model):
     
     def total_membros(self):
         return self.membros.count()
+
+
+class SolicitacaoCadastro(models.Model):
+    """Modelo para solicitações de cadastro de novos usuários"""
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente'),
+        ('aprovada', 'Aprovada'),
+        ('rejeitada', 'Rejeitada'),
+    ]
+    
+    nome_completo = models.CharField(max_length=150)
+    email = models.EmailField(unique=True)
+    data_nascimento = models.DateField()
+    senha_hash = models.CharField(max_length=255)  # Hash da senha
+    matricula = models.CharField(max_length=20, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pendente')
+    data_solicitacao = models.DateTimeField(auto_now_add=True)
+    data_aprovacao = models.DateTimeField(null=True, blank=True)
+    coordenador_aprovador = models.ForeignKey(
+        Usuario, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='solicitacoes_aprovadas',
+        help_text="Coordenador que aprovou/rejeitou a solicitação"
+    )
+    motivo_rejeicao = models.TextField(blank=True, help_text="Motivo da rejeição (se aplicável)")
+    
+    class Meta:
+        verbose_name = 'Solicitação de Cadastro'
+        verbose_name_plural = 'Solicitações de Cadastro'
+        ordering = ['-data_solicitacao']
+    
+    def __str__(self):
+        return f"{self.nome_completo} ({self.status})"
+    
+    @staticmethod
+    def gerar_matricula():
+        """Gera uma matrícula aleatória única"""
+        while True:
+            matricula = ''.join(random.choices(string.digits, k=8))
+            if not SolicitacaoCadastro.objects.filter(matricula=matricula).exists():
+                return matricula

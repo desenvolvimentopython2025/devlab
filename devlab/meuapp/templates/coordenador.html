@@ -8,7 +8,7 @@
         <h1 class="text-white mb-2">
             <strong>👨‍💼 Dashboard do Coordenador</strong>
         </h1>
-        <p class="text-white-50">Bem-vindo, {{ user.get_full_name|default:user.username }}! Gerencie todos os aspectos do DevLab.</p>
+        <p class="text-white-50">Gerencie todos os aspectos do DevLab.</p>
     </div>
 </div>
 
@@ -42,15 +42,16 @@
                 <h1 class="display-4 text-info mb-0">{{ total_usuarios }}</h1>
                 <p class="text-muted mb-0">Usuários</p>
                 <small class="text-muted">
-                    {{ total_coordenadores }} coord. | 
-                    {{ total_professores }} prof. | 
+                    {{ total_coordenadores }} coord. |
+                    {{ total_professores }} prof. |
                     {{ total_estudantes }} est.
                 </small>
             </div>
         </div>
     </div>
     <div class="col-md-3 mb-3">
-        <div class="card text-center h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="card text-center h-100"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
             <div class="card-body d-flex flex-column justify-content-center">
                 <h3 class="mb-0">Acesso Total</h3>
                 <p class="mb-0 mt-2"><small>Você pode gerenciar tudo</small></p>
@@ -89,6 +90,26 @@
     </div>
 </div>
 
+<!-- Card de Solicitações de Cadastro -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-user-clock"></i> Solicitações de Cadastro Pendentes</h5>
+                <a href="{% url 'solicitacoes_cadastro_lista' %}" class="btn btn-sm btn-outline-dark">Ver Todas</a>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">Existem <strong>{{ total_pendentes }}</strong> solicitações de cadastro aguardando
+                    aprovação.</p>
+                <a href="{% url 'solicitacoes_cadastro_lista' %}" class="btn btn-warning">
+                    <i class="fas fa-user-check"></i> Gerenciar Solicitações
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Fim Card Solicitações -->
+
 <div class="row">
     <!-- Projetos Recentes -->
     <div class="col-md-6 mb-4">
@@ -99,27 +120,27 @@
             </div>
             <div class="card-body">
                 {% if projetos %}
-                    <div class="list-group">
-                        {% for projeto in projetos %}
-                        <a href="{% url 'projeto_detalhes' projeto.pk %}" 
-                           class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">{{ projeto.titulo }}</h6>
-                                    <small class="text-muted">{{ projeto.cliente }}</small>
-                                </div>
-                                <span class="badge bg-{% if projeto.status == 'concluido' %}success{% elif projeto.status == 'andamento' %}warning{% else %}secondary{% endif %}">
-                                    {{ projeto.get_status_display }}
-                                </span>
+                <div class="list-group">
+                    {% for projeto in projetos %}
+                    <a href="{% url 'projeto_detalhes' projeto.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ projeto.titulo }}</h6>
+                                <small class="text-muted">{{ projeto.cliente }}</small>
                             </div>
-                        </a>
-                        {% endfor %}
-                    </div>
+                            <span
+                                class="badge bg-{% if projeto.status == 'concluido' %}success{% elif projeto.status == 'andamento' %}warning{% else %}secondary{% endif %}">
+                                {{ projeto.get_status_display }}
+                            </span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <p class="text-muted text-center py-4">Nenhum projeto cadastrado</p>
-                    <div class="text-center">
-                        <a href="{% url 'projeto_criar' %}" class="btn btn-primary">Criar Primeiro Projeto</a>
-                    </div>
+                <p class="text-muted text-center py-4">Nenhum projeto cadastrado</p>
+                <div class="text-center">
+                    <a href="{% url 'projeto_criar' %}" class="btn btn-primary">Criar Primeiro Projeto</a>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -134,25 +155,24 @@
             </div>
             <div class="card-body">
                 {% if equipes %}
-                    <div class="list-group">
-                        {% for equipe in equipes %}
-                        <a href="{% url 'equipe_detalhes' equipe.pk %}" 
-                           class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">{{ equipe.nome }}</h6>
-                                    <small class="text-muted">{{ equipe.projeto.titulo }}</small>
-                                </div>
-                                <span class="badge bg-info">{{ equipe.total_membros }} membros</span>
+                <div class="list-group">
+                    {% for equipe in equipes %}
+                    <a href="{% url 'equipe_detalhes' equipe.pk %}" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ equipe.nome }}</h6>
+                                <small class="text-muted">{{ equipe.projeto.titulo }}</small>
                             </div>
-                        </a>
-                        {% endfor %}
-                    </div>
+                            <span class="badge bg-info">{{ equipe.total_membros }} membros</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <p class="text-muted text-center py-4">Nenhuma equipe cadastrada</p>
-                    <div class="text-center">
-                        <a href="{% url 'equipe_criar' %}" class="btn btn-success">Criar Primeira Equipe</a>
-                    </div>
+                <p class="text-muted text-center py-4">Nenhuma equipe cadastrada</p>
+                <div class="text-center">
+                    <a href="{% url 'equipe_criar' %}" class="btn btn-success">Criar Primeira Equipe</a>
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -169,43 +189,44 @@
             </div>
             <div class="card-body">
                 {% if usuarios %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Nome</th>
-                                    <th>Tipo</th>
-                                    <th>Matrícula</th>
-                                    <th>Email</th>
-                                    <th>Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for usuario in usuarios %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ usuario.get_full_name|default:usuario.username }}</strong>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-{% if usuario.tipo == 'coordenador' %}danger{% elif usuario.tipo == 'professor' %}warning{% else %}primary{% endif %}">
-                                            {{ usuario.get_tipo_display }}
-                                        </span>
-                                    </td>
-                                    <td>{{ usuario.matricula|default:"-" }}</td>
-                                    <td>{{ usuario.email|default:"-" }}</td>
-                                    <td>
-                                        <a href="{% url 'usuario_editar' usuario.pk %}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            Editar
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Matrícula</th>
+                                <th>Email</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario in usuarios %}
+                            <tr>
+                                <td>
+                                    <strong>{{ usuario.get_full_name|default:usuario.username }}</strong>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge bg-{% if usuario.tipo == 'coordenador' %}danger{% elif usuario.tipo == 'professor' %}warning{% else %}primary{% endif %}">
+                                        {{ usuario.get_tipo_display }}
+                                    </span>
+                                </td>
+                                <td>{{ usuario.matricula|default:"-" }}</td>
+                                <td>{{ usuario.email|default:"-" }}</td>
+                                <td>
+                                    <a href="{% url 'usuario_editar' usuario.pk %}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
                 {% else %}
-                    <p class="text-muted text-center py-4">Nenhum usuário cadastrado</p>
+                <p class="text-muted text-center py-4">Nenhum usuário cadastrado</p>
                 {% endif %}
             </div>
         </div>

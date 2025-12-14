@@ -5,8 +5,9 @@ Arquivo: meuapp/forms.py
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
-from .models import Usuario, Projeto, Equipe, ParticipacaoProjeto
+from .models import Usuario, Projeto, Equipe, ParticipacaoProjeto, SolicitacaoCadastro
 
 
 # ============================================================
@@ -18,10 +19,10 @@ class LoginForm(forms.Form):
     
     username = forms.CharField(
         max_length=150,
-        label='Usuário',
+        label='Usuário ou E-mail',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Digite seu usuário',
+            'placeholder': 'Digite seu usuário ou e-mail',
             'autofocus': True
         })
     )
@@ -429,5 +430,137 @@ class ParticipacaoProjetoForm(forms.ModelForm):
                     f'{usuario.get_full_name() or usuario.username} já participa '
                     f'do projeto {projeto.titulo}.'
                 )
+        
+        return cleaned_data
+
+
+# ============================================================
+# FORMULÁRIO DE CADASTRO (REGISTRO)
+# ============================================================
+
+class SolicitacaoCadastroForm(forms.ModelForm):
+    """Formulário para solicitação de cadastro de novos usuários"""
+    
+    password1 = forms.CharField(
+        label='Senha',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Digite uma senha forte (mínimo 8 caracteres)'
+        }),
+        min_length=8,
+        required=True
+    )
+    
+    password2 = forms.CharField(
+        label='Confirmação de Senha',
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirme sua senha'
+        }),
+        required=True
+    )
+    
+    class Meta:
+        model = SolicitacaoCadastro
+        fields = ['nome_completo', 'email', 'data_nascimento', 'password1', 'password2']
+        
+        labels = {
+            'nome_completo': 'Nome Completo',
+            'email': 'E-mail',
+            'data_nascimento': 'Data de Nascimento',
+        }
+        
+        widgets = {
+            'nome_completo': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: João da Silva Santos',
+                'autofocus': True
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: joao.silva@email.com'
+            }),
+            'data_nascimento': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Gerar matricula automaticamente (não é exibida no formulário)
+        if not self.instance.pk:
+            self.instance.matricula = SolicitacaoCadastro.gerar_matricula()
+    
+    def clean(self):
+        """Validações customizadas"""
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        email = cleaned_data.get('email')
+        
+        # Validar se as senhas correspondem
+        if password1 and password2:
+            if password1 != password2:
+                raise forms.ValidationError('As senhas não correspondem.')
+        
+        # Validar se o email já está registrado (em usuários existentes ou solicitações)
+        if email:
+            if Usuario.objects.filter(email=email).exists():
+                raise forms.ValidationError('Este e-mail já está cadastrado no sistema.')
+            
+            if SolicitacaoCadastro.objects.filter(email=email).exclude(status='rejeitada').exists():
+                raise forms.ValidationError('Já existe uma solicitação de cadastro com este e-mail.')
+        
+        return cleaned_data
+    
+    def save(self, commit=True):
+        """Salvar com hash da senha"""
+        instance = super().save(commit=False)
+        password = self.cleaned_data.get('password1')
+        
+        if password:
+            instance.senha_hash = make_password(password)
+        
+        # Garantir que a matrícula seja única
+        if not instance.matricula:
+            instance.matricula = SolicitacaoCadastro.gerar_matricula()
+        
+        if commit:
+            instance.save()
+        return instance
+
+
+class SolicitacaoCadastroAprovarForm(forms.ModelForm):
+    """Formulário para aprovar/rejeitar solicitações de cadastro"""
+    
+    class Meta:
+        model = SolicitacaoCadastro
+        fields = ['status', 'motivo_rejeicao']
+        
+        labels = {
+            'status': 'Status',
+            'motivo_rejeicao': 'Motivo da Rejeição',
+        }
+        
+        widgets = {
+            'status': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'motivo_rejeicao': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Explique o motivo da rejeição (obrigatório se rejeitado)'
+            }),
+        }
+    
+    def clean(self):
+        """Validar se motivo é preenchido quando rejeita"""
+        cleaned_data = super().clean()
+        status = cleaned_data.get('status')
+        motivo = cleaned_data.get('motivo_rejeicao')
+        
+        if status == 'rejeitada' and not motivo:
+            raise forms.ValidationError('O motivo da rejeição é obrigatório ao rejeitar uma solicitação.')
         
         return cleaned_data

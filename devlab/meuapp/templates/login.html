@@ -153,7 +153,7 @@
                 {% csrf_token %}
 
                 <div class="mb-3">
-                    <label for="id_username" class="form-label fw-bold">Usuário</label>
+                    <label for="id_username" class="form-label fw-bold">Usuário ou E-mail</label>
                     {{ form.username }}
                     {% if form.username.errors %}
                     <div class="text-danger mt-1">{{ form.username.errors }}</div>
@@ -184,12 +184,14 @@
             </div>
 
             <div class="text-center mt-3">
-                <a href="{% url 'home' %}" class="btn btn-outline-primary" style="font-weight:600;">&larr; Voltar para Início</a>
+                <a href="{% url 'home' %}" class="btn btn-outline-primary" style="font-weight:600;">&larr; Voltar para
+                    Início</a>
             </div>
 
             <div class="text-center mt-4">
                 <small class="text-muted">
-                    <p>Não tem uma conta? Entre em contato com a coordenação.</p>
+                    <p>Não tem uma conta? <a href="{% url 'registro' %}"
+                            style="color: #667eea; font-weight:600;">Solicite cadastro aqui</a></p>
                     <a href="{% url 'password_reset' %}" style="color: #667eea; font-weight:600;">Esqueceu a senha?</a>
                 </small>
             </div>

@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Solicitações de Cadastro - DevLab Projects{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Cabeçalho -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-clipboard-list"></i> Solicitações de Cadastro
+            </h2>
+            <p class="text-muted">Gerencie as solicitações de cadastro de novos usuários</p>
+        </div>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <h6 class="card-title text-primary">
+                        <i class="fas fa-hourglass-half"></i> Pendentes
+                    </h6>
+                    <h3>{{ total_pendentes }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h6 class="card-title text-success">
+                        <i class="fas fa-check-circle"></i> Aprovadas
+                    </h6>
+                    <h3>{{ total_aprovadas }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h6 class="card-title text-danger">
+                        <i class="fas fa-times-circle"></i> Rejeitadas
+                    </h6>
+                    <h3>{{ total_rejeitadas }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros e Busca -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <!-- Filtro por status -->
+                <div class="col-md-4">
+                    <label for="status" class="form-label">Filtrar por Status</label>
+                    <select name="status" id="status" class="form-select" onchange="this.form.submit()">
+                        <option value="pendente" {% if status_atual == 'pendente' %}selected{% endif %}>Pendentes</option>
+                        <option value="aprovada" {% if status_atual == 'aprovada' %}selected{% endif %}>Aprovadas</option>
+                        <option value="rejeitada" {% if status_atual == 'rejeitada' %}selected{% endif %}>Rejeitadas
+                        </option>
+                        <option value="todas" {% if status_atual == 'todas' %}selected{% endif %}>Todas</option>
+                    </select>
+                </div>
+
+                <!-- Busca -->
+                <div class="col-md-6">
+                    <label for="q" class="form-label">Buscar</label>
+                    <input type="text" name="q" id="q" class="form-control" placeholder="Nome, e-mail ou matrícula..."
+                        value="{{ request.GET.q }}">
+                </div>
+
+                <!-- Botão buscar -->
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Solicitações -->
+    <div class="card">
+        <div class="table-responsive">
+            {% if solicitacoes %}
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nome Completo</th>
+                        <th>E-mail</th>
+                        <th>Matrícula</th>
+                        <th>Data de Solicitação</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitacao in solicitacoes %}
+                    <tr>
+                        <td>
+                            <strong>{{ solicitacao.nome_completo }}</strong>
+                        </td>
+                        <td>
+                            {{ solicitacao.email }}
+                        </td>
+                        <td>
+                            <code>{{ solicitacao.matricula }}</code>
+                        </td>
+                        <td>
+                            {{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}
+                        </td>
+                        <td>
+                            {% if solicitacao.status == 'pendente' %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-hourglass-half"></i> Pendente
+                            </span>
+                            {% elif solicitacao.status == 'aprovada' %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle"></i> Aprovada
+                            </span>
+                            {% else %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-times-circle"></i> Rejeitada
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'solicitacao_cadastro_detalhes' solicitacao.pk %}"
+                                class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye"></i> Detalhes
+                            </a>
+                            
+                            {% if solicitacao.status == 'pendente' %}
+                            <button type="button" class="btn btn-sm btn-success" 
+                                    onclick="aprovarSolicitacao({{ solicitacao.pk }})">
+                                <i class="fas fa-check"></i> Aprovar
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" 
+                                    onclick="rejeitarSolicitacao({{ solicitacao.pk }})">
+                                <i class="fas fa-times"></i> Rejeitar
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="fas fa-inbox fa-3x mb-3" style="opacity: 0.3;"></i>
+                <p>Nenhuma solicitação encontrada.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .btn-sm {
+        margin-right: 0.25rem;
+        margin-bottom: 0.25rem;
+    }
+</style>
+
+<script>
+function aprovarSolicitacao(id) {
+    if (confirm('Tem certeza que deseja aprovar esta solicitação?')) {
+        fetch(`/solicitacoes-cadastro/${id}/aprovar/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => {
+            console.log('Status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Solicitação aprovada com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao aprovar solicitação: ' + (data.message || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Erro completo:', error);
+            alert('Erro ao processar solicitação: ' + error.message);
+        });
+    }
+}
+
+function rejeitarSolicitacao(id) {
+    const motivo = prompt('Motivo da rejeição (opcional):');
+    if (motivo !== null) {
+        fetch(`/solicitacoes-cadastro/${id}/rejeitar/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ motivo: motivo })
+        })
+        .then(response => {
+            console.log('Status:', response.status);
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP ${response.status}: ${text}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Solicitação rejeitada com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao rejeitar solicitação: ' + (data.message || 'Erro desconhecido'));
+            }
+        })
+        .catch(error => {
+            console.error('Erro completo:', error);
+            alert('Erro ao processar solicitação: ' + error.message);
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

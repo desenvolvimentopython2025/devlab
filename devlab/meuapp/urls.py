@@ -9,6 +9,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('registro/', views.registro_view, name='registro'),
     # Password reset (recuperação de senha)
     path('password-reset/', auth_views.PasswordResetView.as_view(
         template_name='password_reset_basic.html'
@@ -63,11 +64,19 @@ urlpatterns = [
     # ============================================================
     path('usuarios/', views.usuario_lista, name='usuario_lista'),
     path('usuarios/novo/', views.usuario_criar, name='usuario_criar'),
+    path('usuarios/<int:pk>/', views.usuario_detalhes, name='usuario_detalhes'),
     path('usuarios/<int:pk>/editar/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/<int:pk>/deletar/', views.usuario_deletar, name='usuario_deletar'),
+    
+    # ============================================================
+    # SOLICITAÇÕES DE CADASTRO (apenas coordenador)
+    # ============================================================
+    path('solicitacoes-cadastro/', views.solicitacoes_cadastro_lista, name='solicitacoes_cadastro_lista'),
+    path('solicitacoes-cadastro/<int:pk>/', views.solicitacao_cadastro_detalhes, name='solicitacao_cadastro_detalhes'),
+    path('usuarios/<int:pk>/editar-aluno/', views.solicitacao_cadastro_editar_aluno, name='solicitacao_cadastro_editar_aluno'),
 
     # ============================================================
-#path('conta/', views.conta, name='conta'),
+    #path('conta/', views.conta, name='conta'),
     path('perfil/', views.perfil, name='perfil'),
     # Password change (allow users to change password from profile)
     path('password-change/', auth_views.PasswordChangeView.as_view(
@@ -77,4 +86,8 @@ urlpatterns = [
     path('password-change/done/', auth_views.PasswordChangeDoneView.as_view(
         template_name='registration/password_change_done.html'
     ), name='password_change_done'),
+
+    #path(aceitar ou rejeitar solicitação de cadastro)
+    path('solicitacoes-cadastro/<int:pk>/aprovar/', views.solicitacao_cadastro_aprovar, name='solicitacao_cadastro_aprovar'),
+    path('solicitacoes-cadastro/<int:pk>/rejeitar/', views.solicitacao_cadastro_rejeitar, name='solicitacao_cadastro_rejeitar'),    
 ]

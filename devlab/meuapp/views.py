@@ -4,13 +4,19 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.hashers import check_password
 from django.core.exceptions import ValidationError
 from django.db.models import Q, Count
-from .models import Usuario, Projeto, Equipe, ParticipacaoProjeto
+from django.utils import timezone
+from django.core.mail import send_mail
+from .models import Usuario, Projeto, Equipe, ParticipacaoProjeto, SolicitacaoCadastro
 from .forms import (
     UsuarioForm, UsuarioEditForm, ProjetoForm, EquipeForm, 
-    ParticipacaoProjetoForm, LoginForm
+    ParticipacaoProjetoForm, LoginForm, SolicitacaoCadastroForm, SolicitacaoCadastroAprovarForm
 )
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+import json
 
 
 # ============================================================
@@ -42,10 +48,19 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
+            username_or_email = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            
+            user = None
+            # Tenta autenticar por username
+            user = authenticate(request, username=username_or_email, password=password)
+            if user is None:
+                # Se não achou, tenta autenticar por e-mail
+                try:
+                    from .models import Usuario
+                    usuario_obj = Usuario.objects.get(email__iexact=username_or_email)
+                    user = authenticate(request, username=usuario_obj.username, password=password)
+                except Usuario.DoesNotExist:
+                    user = None
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Bem-vindo, {user.get_full_name() or user.username}!')
@@ -54,7 +69,6 @@ def login_view(request):
                 messages.error(request, 'Usuário ou senha inválidos.')
     else:
         form = LoginForm()
-    
     return render(request, 'login.html', {'form': form})
 
 
@@ -518,4 +532,270 @@ def perfil (request):
     return render(request, 'perfil.html', {'user': user})
 
 
+# ============================================================
+# VIEWS DE REGISTRO E APROVAÇÃO DE CADASTRO
+# ============================================================
 
+def registro_view(request):
+    """View para registro/solicitação de cadastro de novos usuários"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = SolicitacaoCadastroForm(request.POST)
+        if form.is_valid():
+            solicitacao = form.save()
+            messages.success(
+                request, 
+                'Solicitação de cadastro enviada com sucesso! Você será contatado após análise da coordenação.'
+            )
+            return redirect('login')
+    else:
+        form = SolicitacaoCadastroForm()
+    
+    return render(request, 'registro.html', {'form': form})
+
+
+@login_required
+@user_passes_test(is_coordenador)
+def solicitacoes_cadastro_lista(request):
+    """Lista todas as solicitações de cadastro para o coordenador"""
+    # Filtrar por status
+    status = request.GET.get('status', 'pendente')
+    status = str(status)  # Garante que status_atual será sempre string
+    
+    if status == 'todas':
+        solicitacoes = SolicitacaoCadastro.objects.all()
+    else:
+        solicitacoes = SolicitacaoCadastro.objects.filter(status=status)
+    
+    # Busca por nome ou email
+    query = request.GET.get('q')
+    if query:
+        solicitacoes = solicitacoes.filter(
+            Q(nome_completo__icontains=query) | 
+            Q(email__icontains=query) |
+            Q(matricula__icontains=query)
+        )
+    
+    context = {
+        'solicitacoes': solicitacoes,
+        'status_atual': status,
+        'total_pendentes': SolicitacaoCadastro.objects.filter(status='pendente').count(),
+        'total_aprovadas': SolicitacaoCadastro.objects.filter(status='aprovada').count(),
+        'total_rejeitadas': SolicitacaoCadastro.objects.filter(status='rejeitada').count(),
+    }
+    return render(request, 'solicitacoes_cadastro/lista.html', context)
+
+
+@login_required
+@user_passes_test(is_coordenador)
+def solicitacao_cadastro_detalhes(request, pk):
+    """Detalhes de uma solicitação de cadastro"""
+    solicitacao = get_object_or_404(SolicitacaoCadastro, pk=pk)
+    
+    if request.method == 'POST':
+        form = SolicitacaoCadastroAprovarForm(request.POST, instance=solicitacao)
+        if form.is_valid():
+            status_anterior = solicitacao.status
+            solicitacao = form.save(commit=False)
+            solicitacao.coordenador_aprovador = request.user
+            solicitacao.data_aprovacao = timezone.now()
+            # Forçar status para aprovada se o botão de aprovação for usado
+            if request.POST.get('status') == 'aprovada':
+                solicitacao.status = 'aprovada'
+            solicitacao.save()
+            
+            if solicitacao.status == 'aprovada':
+                try:
+                    nome_partes = solicitacao.nome_completo.strip().split()
+                    first_name = nome_partes[0] if len(nome_partes) > 0 else ''
+                    last_name = ' '.join(nome_partes[1:]) if len(nome_partes) > 1 else ''
+                    username = solicitacao.email.split('@')[0]
+                    username_original = username
+                    contador = 1
+                    while Usuario.objects.filter(username=username).exists():
+                        username = f"{username_original}{contador}"
+                        contador += 1
+                    usuario = Usuario.objects.create_user(
+                        username=username,
+                        email=solicitacao.email,
+                        first_name=first_name,
+                        last_name=last_name,
+                        password=None
+                    )
+                    usuario.password = solicitacao.senha_hash
+                    usuario.matricula = solicitacao.matricula
+                    usuario.data_nascimento = solicitacao.data_nascimento
+                    usuario.tipo = 'estudante'
+                    usuario.save()
+                    # Enviar e-mail de confirmação
+                    send_mail(
+                        subject='Cadastro aprovado no DevLab',
+                        message=f'Seu cadastro foi aprovado!\n\nMatrícula: {usuario.matricula}\nUsuário: {usuario.username}\nAcesse o sistema com seu e-mail e senha cadastrados.',
+                        from_email=None,
+                        recipient_list=[usuario.email],
+                        fail_silently=True
+                    )
+                    messages.success(
+                        request, 
+                        f'Solicitação aprovada com sucesso! Usuário {username} criado e e-mail enviado.'
+                    )
+                except Exception as e:
+                    messages.error(
+                        request, 
+                        f'Solicitação aprovada, mas houve erro ao criar usuário: {str(e)}'
+                    )
+            else:
+                messages.success(request, 'Solicitação rejeitada com sucesso!')
+            
+            return redirect('solicitacoes_cadastro_lista')
+    else:
+        form = SolicitacaoCadastroAprovarForm(instance=solicitacao)
+    
+    context = {
+        'solicitacao': solicitacao,
+        'form': form,
+    }
+    return render(request, 'solicitacoes_cadastro/detalhes.html', context)
+
+
+@login_required
+@user_passes_test(is_coordenador)
+def solicitacao_cadastro_editar_aluno(request, pk):
+    """View para o coordenador editar cadastro de aluno já aprovado"""
+    usuario = get_object_or_404(Usuario, pk=pk)
+    
+    # Apenas coordenador pode editar
+    if request.user.tipo != 'coordenador':
+        messages.error(request, 'Você não tem permissão para editar este usuário.')
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = UsuarioEditForm(request.POST, instance=usuario)
+        if form.is_valid():
+            usuario = form.save()
+            messages.success(request, f'Dados de {usuario.get_full_name() or usuario.username} atualizados com sucesso!')
+            return redirect('usuario_detalhes', pk=usuario.pk)
+    else:
+        form = UsuarioEditForm(instance=usuario)
+    
+    context = {
+        'form': form,
+        'usuario': usuario,
+        'acao': 'Editar',
+    }
+    return render(request, 'usuarios/form.html', context)
+
+
+@login_required
+def usuario_detalhes(request, pk):
+    from django.shortcuts import get_object_or_404
+    usuario = get_object_or_404(Usuario, pk=pk)
+    return render(request, 'usuarios/detalhes.html', {'usuario': usuario})
+
+
+@login_required
+@user_passes_test(is_coordenador)
+@require_POST
+def solicitacao_cadastro_aprovar(request, pk):
+    """Aprovar solicitação via AJAX"""
+    try:
+        solicitacao = get_object_or_404(SolicitacaoCadastro, pk=pk)
+        
+        if solicitacao.status != 'pendente':
+            return JsonResponse({
+                'success': False, 
+                'message': 'Esta solicitação já foi processada.'
+            })
+        
+        # Aprovar solicitação
+        solicitacao.status = 'aprovada'
+        solicitacao.coordenador_aprovador = request.user
+        solicitacao.data_aprovacao = timezone.now()
+        solicitacao.save()
+        
+        # Criar usuário
+        nome_partes = solicitacao.nome_completo.strip().split()
+        first_name = nome_partes[0] if len(nome_partes) > 0 else ''
+        last_name = ' '.join(nome_partes[1:]) if len(nome_partes) > 1 else ''
+        username = solicitacao.email.split('@')[0]
+        username_original = username
+        contador = 1
+        
+        while Usuario.objects.filter(username=username).exists():
+            username = f"{username_original}{contador}"
+            contador += 1
+        
+        usuario = Usuario.objects.create_user(
+            username=username,
+            email=solicitacao.email,
+            first_name=first_name,
+            last_name=last_name,
+            password=None
+        )
+        usuario.password = solicitacao.senha_hash
+        usuario.matricula = solicitacao.matricula
+        usuario.data_nascimento = solicitacao.data_nascimento
+        usuario.tipo = 'estudante'
+        usuario.save()
+        
+        # Enviar e-mail
+        try:
+            send_mail(
+                subject='Cadastro aprovado no DevLab',
+                message=f'Seu cadastro foi aprovado!\n\nMatrícula: {usuario.matricula}\nUsuário: {usuario.username}\nAcesse o sistema com seu e-mail e senha cadastrados.',
+                from_email=None,
+                recipient_list=[usuario.email],
+                fail_silently=True
+            )
+        except:
+            pass
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Usuário {username} criado com sucesso!'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
+
+
+@login_required
+@user_passes_test(is_coordenador)
+@require_POST
+def solicitacao_cadastro_rejeitar(request, pk):
+    """Rejeitar solicitação via AJAX"""
+    try:
+        solicitacao = get_object_or_404(SolicitacaoCadastro, pk=pk)
+        
+        if solicitacao.status != 'pendente':
+            return JsonResponse({
+                'success': False, 
+                'message': 'Esta solicitação já foi processada.'
+            })
+        
+        # Obter motivo do body
+        data = json.loads(request.body)
+        motivo = data.get('motivo', '')
+        
+        # Rejeitar solicitação
+        solicitacao.status = 'rejeitada'
+        solicitacao.motivo_rejeicao = motivo
+        solicitacao.coordenador_aprovador = request.user
+        solicitacao.data_aprovacao = timezone.now()
+        solicitacao.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Solicitação rejeitada com sucesso!'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)

@@ -1,7 +1,6 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-
 urlpatterns = [
     # ============================================================
     # AUTENTICAÇÃO
@@ -15,7 +14,7 @@ urlpatterns = [
         template_name='password_reset_basic.html'
     ), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
-        template_name='registration/password_reset_done.html'
+        template_name='password_reset_done.html'  # Corrigido para o arquivo existente
     ), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
         template_name='registration/password_reset_confirm.html'
@@ -24,11 +23,7 @@ urlpatterns = [
         template_name='registration/password_reset_complete.html'
     ), name='password_reset_complete'),
     
-
-
-
     # ============================================================
-
     # DASHBOARDS
     # ============================================================
     path('dashboard/', views.dashboard, name='dashboard'),
@@ -79,18 +74,8 @@ urlpatterns = [
     #path('conta/', views.conta, name='conta'),
     path('perfil/', views.perfil, name='perfil'),
     # Password change (allow users to change password from profile)
-    path('password-reset/', 
-         auth_views.PasswordResetView.as_view(
-             template_name='registration/password_reset_basic.html'
-         ), 
-         name='password_reset'),
+    # Removido o bloco duplicado de password-reset/ para evitar conflitos
     
-    path('password-reset/done/', 
-         auth_views.PasswordResetDoneView.as_view(
-             template_name='registration/password_reset_done.html'
-         ), 
-         name='password_reset_done'),
-
     #path(aceitar ou rejeitar solicitação de cadastro)
     path('solicitacoes-cadastro/<int:pk>/aprovar/', views.solicitacao_cadastro_aprovar, name='solicitacao_cadastro_aprovar'),
     path('solicitacoes-cadastro/<int:pk>/rejeitar/', views.solicitacao_cadastro_rejeitar, name='solicitacao_cadastro_rejeitar'),    

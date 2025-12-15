@@ -57,9 +57,9 @@ class UsuarioForm(UserCreationForm):
             'matricula', 
             'cpf', 
             'data_nascimento', 
-            'curso',
+            'funcao',
             'password1', 
-            'password2'
+            'password2' 
         ]
         
         labels = {
@@ -71,7 +71,7 @@ class UsuarioForm(UserCreationForm):
             'matricula': 'Matrícula',
             'cpf': 'CPF',
             'data_nascimento': 'Data de nascimento',
-            'curso': 'Curso',
+            'funcao': 'Função',
         }
         
         widgets = {
@@ -107,9 +107,9 @@ class UsuarioForm(UserCreationForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
-            'curso': forms.TextInput(attrs={
+            'funcao': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ex: Análise e Desenvolvimento de Sistemas'
+                'placeholder': 'Ex: Desenvolvedor Backend, Designer UI/UX'
             }),
         }
     
@@ -149,7 +149,7 @@ class UsuarioEditForm(forms.ModelForm):
             'matricula', 
             'cpf', 
             'data_nascimento', 
-            'curso',
+            'funcao',
             'is_active'
         ]
         
@@ -162,7 +162,7 @@ class UsuarioEditForm(forms.ModelForm):
             'matricula': 'Matrícula',
             'cpf': 'CPF',
             'data_nascimento': 'Data de nascimento',
-            'curso': 'Curso',
+            'funcao': 'Função',
             'is_active': 'Usuário ativo',
         }
         
@@ -199,9 +199,9 @@ class UsuarioEditForm(forms.ModelForm):
                 'class': 'form-control',
                 'type': 'date'
             }),
-            'curso': forms.TextInput(attrs={
+            'funcao': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ex: Análise e Desenvolvimento de Sistemas'
+                'placeholder': 'Ex: Desenvolvedor Backend, Designer UI/UX'
             }),
             'is_active': forms.CheckboxInput(attrs={
                 'class': 'form-check-input'
@@ -318,15 +318,12 @@ class EquipeForm(forms.ModelForm):
             'lider': forms.Select(attrs={
                 'class': 'form-control'
             }),
-            'membros': forms.SelectMultiple(attrs={
-                'class': 'form-control',
-                'size': 10
-            }),
+            'membros': forms.CheckboxSelectMultiple(),
         }
         
         help_texts = {
             'lider': 'Cada usuário pode ser líder de no máximo uma equipe',
-            'membros': 'Segure Ctrl (Windows/Linux) ou Cmd (Mac) para selecionar múltiplos membros',
+            'membros': 'Selecione os usuários que farão parte da equipe.',
         }
     
     def __init__(self, *args, **kwargs):

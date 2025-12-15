@@ -78,5 +78,6 @@ urlpatterns = [
     
     #path(aceitar ou rejeitar solicitação de cadastro)
     path('solicitacoes-cadastro/<int:pk>/aprovar/', views.solicitacao_cadastro_aprovar, name='solicitacao_cadastro_aprovar'),
-    path('solicitacoes-cadastro/<int:pk>/rejeitar/', views.solicitacao_cadastro_rejeitar, name='solicitacao_cadastro_rejeitar'),    
+    path('solicitacoes-cadastro/<int:pk>/rejeitar/', views.solicitacao_cadastro_rejeitar, name='solicitacao_cadastro_rejeitar'),
+      path('test-email/', views.test_email_view, name='test_email'),    
 ]

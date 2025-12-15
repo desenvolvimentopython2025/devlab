@@ -1,6 +1,7 @@
 
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -119,6 +120,20 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
  
-# Email (desenvolvimento): imprime emails no console
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL = 'no-reply@devlab.local'
+# ============================================================
+# CONFIGURAÇÕES DE E-MAIL (PARA RECUPERAÇÃO DE SENHA E OUTROS)
+# ============================================================
+# Para desenvolvimento, você pode descomentar a linha abaixo para ver os e-mails no console
+# em vez de enviá-los de verdade.
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Configuração para usar o Gmail (para produção/teste real) - Valores fixos
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 567
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'desenvolvimentopython7@gmail.com'  # <-- Insira seu e-mail do Gmail aqui
+EMAIL_HOST_PASSWORD = 'heopu lswn btma tmre' # <-- Insira a Senha de App de 16 caracteres gerada pelo Google
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_TIMEOUT = 60  # Aumenta o tempo limite para 20 segundos para evitar TimeoutError em redes lentas

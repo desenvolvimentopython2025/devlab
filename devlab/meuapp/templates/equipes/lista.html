@@ -1,95 +1,70 @@
 {% extends 'base.html' %}
 
-{% block title %}Equipes - DevLab{% endblock %}
+{% block title %}Lista de Equipes — DevLab{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <div>
-                <h2 class="text-white mb-0">Equipes</h2>
-                <p class="text-white-50">Gerencie as equipes dos projetos</p>
-            </div>
-            {% if user.tipo == 'coordenador' %}
-            <a href="{% url 'equipe_criar' %}" class="btn btn-light">
-                <strong>+ Nova Equipe</strong>
-            </a>
-            {% endif %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Equipes</h1>
+        {% if user.tipo == 'coordenador' %}
+        <a href="{% url 'equipe_criar' %}" class="btn btn-primary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-plus"></i>
+            </span>
+            <span class="text">Nova Equipe</span>
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Formulário de Busca -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'equipe_lista' %}" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Buscar por nome da equipe ou projeto..." value="{{ request.GET.q }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </form>
         </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body">
-        {% if equipes %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Projeto</th>
-                        <th>Líder</th>
-                        <th>Membros</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for equipe in equipes %}
-                    <tr>
-                        <td>
-                            <strong>{{ equipe.nome }}</strong>
-                        </td>
-                        <td>
-                            {% if equipe.projeto %}
-                            <a href="{% url 'projeto_detalhes' equipe.projeto.pk %}">
-                                {{ equipe.projeto.titulo }}
-                            </a>
-                            {% else %}
-                            <span class="text-muted">Sem projeto</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if equipe.lider %}
-                                {{ equipe.lider.get_full_name|default:equipe.lider.username }}
-                                {% if equipe.lider == user %}
-                                    <span class="badge bg-warning text-dark">Você</span>
-                                {% endif %}
-                            {% else %}
-                                <span class="text-muted">Não definido</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <span class="badge bg-info">{{ equipe.total_membros }} membros</span>
-                        </td>
-                        <td>
-                            <a href="{% url 'equipe_detalhes' equipe.pk %}" class="btn btn-sm btn-info">
-                                Ver Detalhes
-                            </a>
-                            {% if user.tipo == 'coordenador' %}
-                            <a href="{% url 'equipe_editar' equipe.pk %}" class="btn btn-sm btn-warning">
-                                Editar
-                            </a>
-                            <a href="{% url 'equipe_deletar' equipe.pk %}" class="btn btn-sm btn-danger">
-                                Deletar
-                            </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Lista de Equipes -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Todas as Equipes</h6>
         </div>
-        {% else %}
-        <div class="text-center py-5">
-            <h3 class="text-muted">Nenhuma equipe encontrada</h3>
-            {% if user.tipo == 'coordenador' %}
-            <p class="text-muted">Comece criando uma nova equipe</p>
-            <a href="{% url 'equipe_criar' %}" class="btn btn-primary">Criar Primeira Equipe</a>
-            {% else %}
-            <p class="text-muted">Você ainda não faz parte de nenhuma equipe</p>
-            {% endif %}
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Nome da Equipe</th>
+                            <th>Projeto Associado</th>
+                            <th>Líder</th>
+                            <th>Total de Membros</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipe in equipes %}
+                        <tr>
+                            <td>{{ equipe.nome }}</td>
+                            <td>{{ equipe.projeto.titulo|default:"N/A" }}</td>
+                            <td>{{ equipe.lider.get_full_name|default:"Nenhum" }}</td>
+                            <td>{{ equipe.total_membros }}</td>
+                            <td>
+                                <a href="{% url 'equipe_detalhes' pk=equipe.pk %}" class="btn btn-info btn-sm">Ver Detalhes</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhuma equipe encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

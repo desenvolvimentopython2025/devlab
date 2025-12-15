@@ -468,8 +468,16 @@ def home(request):
         'local': 'Bloco A, Sala 101',
         'horario': 'Seg–Sex 09:00–17:00',
     }
+    
+    # Buscar últimas solicitações aprovadas para mostrar na home
+    solicitacoes_aprovadas = SolicitacaoCadastro.objects.filter(status='aprovada').order_by('-data_aprovacao')[:5]
 
-    return render(request, 'home.html', {'coordenacao': coordenacao})
+    context = {
+        'coordenacao': coordenacao,
+        'solicitacoes_aprovadas': solicitacoes_aprovadas,
+    }
+
+    return render(request, 'home.html', context)
 
 def visitante_view(request):
     """View pública para visitantes"""
@@ -689,10 +697,21 @@ def solicitacao_cadastro_editar_aluno(request, pk):
 
 
 @login_required
+@user_passes_test(is_coordenador)
 def usuario_detalhes(request, pk):
-    from django.shortcuts import get_object_or_404
+    """Exibe os detalhes de um usuário (apenas para coordenador)"""
     usuario = get_object_or_404(Usuario, pk=pk)
-    return render(request, 'usuarios/detalhes.html', {'usuario': usuario})
+    
+    # Buscar projetos e equipes do usuário
+    projetos_participando = usuario.projetos_participando.all()
+    equipes_participando = usuario.equipes_participando.all()
+    
+    context = {
+        'usuario': usuario,
+        'projetos_participando': projetos_participando,
+        'equipes_participando': equipes_participando,
+    }
+    return render(request, 'usuarios/detalhes.html', context)
 
 
 @login_required
@@ -799,3 +818,129 @@ def solicitacao_cadastro_rejeitar(request, pk):
             'success': False,
             'message': str(e)
         }, status=500)
+    
+
+def test_email_view(request):
+    """View para testar configurações de email via web (apenas para DEBUG)"""
+    if not settings.DEBUG:
+        return HttpResponse("Esta view só está disponível em modo DEBUG.", status=403)
+    
+    if not request.user.is_superuser:
+        return HttpResponse("Acesso restrito a superusuários.", status=403)
+    
+    output = []
+    
+    def add_output(text, style="info"):
+        """Helper para adicionar saída formatada"""
+        if style == "success":
+            output.append(f'<div style="color: green; margin: 5px 0;">✓ {text}</div>')
+        elif style == "error":
+            output.append(f'<div style="color: red; margin: 5px 0;">✗ {text}</div>')
+        elif style == "warning":
+            output.append(f'<div style="color: orange; margin: 5px 0;">⚠ {text}</div>')
+        else:
+            output.append(f'<div style="margin: 5px 0;">{text}</div>')
+    
+    # Testar configurações
+    add_output('<h2>Teste de Configuração de Email</h2>')
+    add_output('<h3>1. Configurações Django:</h3>')
+    
+    configs = [
+        ('EMAIL_BACKEND', settings.EMAIL_BACKEND),
+        ('EMAIL_HOST', settings.EMAIL_HOST),
+        ('EMAIL_PORT', settings.EMAIL_PORT),
+        ('EMAIL_USE_TLS', settings.EMAIL_USE_TLS),
+        ('EMAIL_USE_SSL', settings.EMAIL_USE_SSL),
+        ('EMAIL_HOST_USER', settings.EMAIL_HOST_USER),
+        ('EMAIL_HOST_PASSWORD', '***' if settings.EMAIL_HOST_PASSWORD else 'NÃO CONFIGURADA'),
+        ('DEFAULT_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL),
+        ('EMAIL_TIMEOUT', getattr(settings, 'EMAIL_TIMEOUT', 'Não definido')),
+    ]
+    
+    for key, value in configs:
+        add_output(f'<strong>{key}:</strong> {value}')
+    
+    # Testar DNS
+    add_output('<h3>2. Teste DNS:</h3>')
+    try:
+        ip = socket.gethostbyname(settings.EMAIL_HOST)
+        add_output(f'Resolvido: {settings.EMAIL_HOST} → {ip}', "success")
+    except socket.gaierror:
+        add_output(f'DNS não resolvido para: {settings.EMAIL_HOST}', "error")
+    
+    # Testar porta
+    add_output('<h3>3. Teste de Porta:</h3>')
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(10)
+    result = sock.connect_ex((settings.EMAIL_HOST, settings.EMAIL_PORT))
+    if result == 0:
+        add_output(f'Porta {settings.EMAIL_PORT} está acessível', "success")
+    else:
+        add_output(f'Porta {settings.EMAIL_PORT} está fechada/inacessível', "error")
+    sock.close()
+    
+    # Testar SMTP
+    add_output('<h3>4. Teste SMTP:</h3>')
+    try:
+        if settings.EMAIL_USE_SSL:
+            server = smtplib.SMTP_SSL(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=10)
+        else:
+            server = smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=10)
+            if settings.EMAIL_USE_TLS:
+                server.starttls(context=ssl.create_default_context())
+        
+        server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+        add_output('Autenticação SMTP bem-sucedida', "success")
+        server.quit()
+    except Exception as e:
+        add_output(f'Erro SMTP: {str(e)}', "error")
+    
+    # Testar envio real
+    add_output('<h3>5. Teste de Envio:</h3>')
+    test_result = ""
+    try:
+        from django.core.mail import send_mail
+        send_mail(
+            'Teste de Email Django',
+            'Esta é uma mensagem de teste.',
+            settings.DEFAULT_FROM_EMAIL,
+            [settings.EMAIL_HOST_USER],  # Enviar para si mesmo
+            fail_silently=False
+        )
+        test_result = '<strong style="color: green;">✓ Email enviado com sucesso!</strong>'
+    except Exception as e:
+        test_result = f'<strong style="color: red;">✗ Erro: {str(e)}</strong>'
+    
+    # HTML final
+    html = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Teste de Email</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; }}
+            .container {{ max-width: 800px; margin: 0 auto; }}
+            .test-section {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; }}
+            h2 {{ color: #333; }}
+            h3 {{ color: #555; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Teste de Configuração de Email</h1>
+            <div class="test-section">
+                {"".join(output)}
+            </div>
+            <div class="test-section">
+                <h3>Resultado do Envio:</h3>
+                {test_result}
+            </div>
+            <div style="margin-top: 20px;">
+                <a href="/">← Voltar</a>
+            </div>
+        </div>
+    </body>
+    </html>
+    '''
+    
+    return HttpResponse(html)

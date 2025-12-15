@@ -1,58 +1,68 @@
 {% extends 'base.html' %}
 
+{% block title %}Lista de Usuários — DevLab{% endblock %}
+
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h2 class="text-white">Usuários do Sistema</h2>
-            <a href="{% url 'usuario_criar' %}" class="btn btn-light">
-                + Novo Usuário
-            </a>
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Usuários</h1>
+        <a href="{% url 'usuario_criar' %}" class="btn btn-primary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-plus"></i>
+            </span>
+            <span class="text">Novo Usuário</span>
+        </a>
+    </div>
+
+    <!-- Formulário de Busca -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'usuario_lista' %}" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Buscar por nome, e-mail ou matrícula..." value="{{ request.GET.q }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </form>
         </div>
     </div>
-</div>
 
-<div class="card">
-    <div class="card-body">
-        {% if usuarios %}
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>Username</th>
-                        <th>Tipo</th>
-                        <th>Matrícula</th>
-                        <th>Email</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in usuarios %}
-                    <tr>
-                        <td><strong>{{ usuario.get_full_name|default:"-" }}</strong></td>
-                        <td>{{ usuario.username }}</td>
-                        <td>
-                            <span class="badge bg-primary">{{ usuario.get_tipo_display }}</span>
-                        </td>
-                        <td>{{ usuario.matricula|default:"-" }}</td>
-                        <td>{{ usuario.email|default:"-" }}</td>
-                        <td>
-                            <a href="{% url 'usuario_editar' usuario.pk %}" class="btn btn-sm btn-warning">
-                                Editar
-                            </a>
-                            <a href="{% url 'usuario_deletar' usuario.pk %}" class="btn btn-sm btn-danger">
-                                Deletar
-                            </a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Lista de Usuários -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Todos os Usuários</h6>
         </div>
-        {% else %}
-        <p class="text-center text-muted py-5">Nenhum usuário encontrado</p>
-        {% endif %}
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Nome Completo</th>
+                            <th>Usuário</th>
+                            <th>Email</th>
+                            <th>Tipo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.get_full_name }}</td>
+                            <td>{{ usuario.username }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>{{ usuario.get_tipo_display }}</td>
+                            <td>
+                                <a href="{% url 'usuario_detalhes' pk=usuario.pk %}" class="btn btn-info btn-sm">Ver Detalhes</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum usuário encontrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -56,6 +56,32 @@
         </div>
     </div>
 
+    <!-- Recentemente Aprovados Section -->
+    {% if solicitacoes_aprovadas %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-3">🎉 Bem-vindos ao DevLab!</h3>
+                    <p class="card-text text-muted mb-4">Confira os últimos membros que se juntaram à nossa comunidade de desenvolvedores:</p>
+                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                        {% for solicitacao in solicitacoes_aprovadas %}
+                            {% with nome_partes=solicitacao.nome_completo.split %}
+                            <span class="badge bg-light text-dark p-3 rounded-pill shadow-sm">
+                                {{ nome_partes.0 }} 
+                                {% if nome_partes|length > 1 %}
+                                    {{ nome_partes.1|first }}.
+                                {% endif %}
+                            </span>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Features Section -->
     <div class="row mb-5">
         <div class="col-md-4 mb-3">

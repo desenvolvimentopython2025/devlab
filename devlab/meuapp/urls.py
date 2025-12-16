@@ -11,10 +11,10 @@ urlpatterns = [
     path('registro/', views.registro_view, name='registro'),
     # Password reset (recuperação de senha)
     path('password-reset/', auth_views.PasswordResetView.as_view(
-        template_name='password_reset_basic.html'
+        template_name='password_reset_basic.html',
     ), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
-        template_name='password_reset_done.html'  # Corrigido para o arquivo existente
+        template_name='password_reset_done.html',  # Corrigido para o arquivo existente
     ), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
         template_name='registration/password_reset_confirm.html'

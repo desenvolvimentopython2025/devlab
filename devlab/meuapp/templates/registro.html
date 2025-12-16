@@ -1,153 +1,172 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="pt-br">
 
-{% block title %}Registro - DevLab Projects{% endblock %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Cadastro - DevLab Projects</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
 
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">
-                        <i class="fas fa-user-plus"></i> Solicitação de Cadastro
-                    </h4>
-                </div>
-                <div class="card-body p-4">
-                    {% if messages %}
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 550px;
+            width: 100%;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="mb-0 fw-bold">Solicitação de Cadastro</h2>
+                        <p class="mb-0 opacity-90 small">Sua solicitação será analisada pela coordenação do DevLab.</p>
                     </div>
-                    {% endfor %}
-                    {% endif %}
-
-                    <p class="text-muted mb-4">
-                        Preencha o formulário abaixo para solicitar cadastro.
-                        Sua solicitação será analisada pela coordenação do DevLab.
-                    </p>
-
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-
-                        <!-- Nome Completo -->
-                        <div class="mb-3">
-                            <label for="{{ form.nome_completo.id_for_label }}" class="form-label fw-bold">
-                                {{ form.nome_completo.label }}
-                            </label>
-                            {{ form.nome_completo }}
-                            {% if form.nome_completo.errors %}
-                            <div class="text-danger mt-1 small">
-                                {{ form.nome_completo.errors }}
-                            </div>
-                            {% endif %}
+                    <div class="card-body p-4">
+                        {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-
-                        <!-- Email -->
-                        <div class="mb-3">
-                            <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
-                                {{ form.email.label }}
-                            </label>
-                            {{ form.email }}
-                            {% if form.email.errors %}
-                            <div class="text-danger mt-1 small">
-                                {{ form.email.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Data de Nascimento -->
-                        <div class="mb-3">
-                            <label for="{{ form.data_nascimento.id_for_label }}" class="form-label fw-bold">
-                                {{ form.data_nascimento.label }}
-                            </label>
-                            {{ form.data_nascimento }}
-                            {% if form.data_nascimento.errors %}
-                            <div class="text-danger mt-1 small">
-                                {{ form.data_nascimento.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Senha -->
-                        <div class="mb-3">
-                            <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
-                                {{ form.password1.label }}
-                            </label>
-                            {{ form.password1 }}
-                            <small class="text-muted d-block mt-1">
-                                A senha deve conter pelo menos 8 caracteres
-                            </small>
-                            {% if form.password1.errors %}
-                            <div class="text-danger mt-1 small">
-                                {{ form.password1.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Confirmação de Senha -->
-                        <div class="mb-4">
-                            <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
-                                {{ form.password2.label }}
-                            </label>
-                            {{ form.password2 }}
-                            {% if form.password2.errors %}
-                            <div class="text-danger mt-1 small">
-                                {{ form.password2.errors }}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <!-- Erros não-campo -->
-                        {% if form.non_field_errors %}
-                        <div class="alert alert-danger mb-3">
-                            {{ form.non_field_errors }}
-                        </div>
+                        {% endfor %}
                         {% endif %}
 
-                        <!-- Botões -->
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane"></i> Enviar Solicitação
-                            </button>
-                        </div>
+                        <form method="post" novalidate>
+                            {% csrf_token %}
 
-                        <div class="text-center mt-3">
-                            <p class="mb-0">
-                                Já tem cadastro?
-                                <a href="{% url 'login' %}" class="fw-bold text-primary">
-                                    Faça login aqui
-                                </a>
-                            </p>
-                        </div>
-                    </form>
+                            <!-- Nome Completo -->
+                            <div class="mb-3">
+                                <label for="{{ form.nome_completo.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.nome_completo.label }}
+                                </label>
+                                {{ form.nome_completo }}
+                                {% if form.nome_completo.errors %}
+                                <div class="text-danger mt-1 small">
+                                    {{ form.nome_completo.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Email -->
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                <div class="text-danger mt-1 small">
+                                    {{ form.email.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Data de Nascimento -->
+                            <div class="mb-3">
+                                <label for="{{ form.data_nascimento.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.data_nascimento.label }}
+                                </label>
+                                {{ form.data_nascimento }}
+                                {% if form.data_nascimento.errors %}
+                                <div class="text-danger mt-1 small">
+                                    {{ form.data_nascimento.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Senha -->
+                            <div class="mb-3">
+                                <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.password1.label }}
+                                </label>
+                                {{ form.password1 }}
+                                <small class="text-muted d-block mt-1">
+                                    A senha deve conter pelo menos 8 caracteres
+                                </small>
+                                {% if form.password1.errors %}
+                                <div class="text-danger mt-1 small">
+                                    {{ form.password1.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Confirmação de Senha -->
+                            <div class="mb-4">
+                                <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                                    {{ form.password2.label }}
+                                </label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                <div class="text-danger mt-1 small">
+                                    {{ form.password2.errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Erros não-campo -->
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-3">
+                                {{ form.non_field_errors }}
+                            </div>
+                            {% endif %}
+
+                            <!-- Botões -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    Enviar Solicitação
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <p class="mb-0 text-muted">
+                                    Já tem cadastro?
+                                    <a href="{% url 'login' %}" class="fw-bold text-primary">
+                                        Faça login aqui
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Informações importantes -->
-            <div class="alert alert-info mt-4" role="alert">
-                <h6 class="alert-heading">
-                    <i class="fas fa-info-circle"></i> Informações Importantes
-                </h6>
-                <ul class="mb-0 small">
-                    <li>Sua solicitação será analisada pela coordenação</li>
-                    <li>Você será contatado por e-mail após a aprovação</li>
-                    <li>Ao ser aprovado, você poderá acessar o sistema com seu e-mail e senha</li>
-                </ul>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 
-    .btn-lg {
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-    }
-</style>
-{% endblock %}
+</html>

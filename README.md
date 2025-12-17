@@ -141,11 +141,11 @@ SolicitacaoCadastro
 
 Isso criará:
 
-✅ 1 Coordenador → coord / coord123
+✅ 1 Coordenador → coordenador.master / 123
 
-✅ 2 Professores → prof1, prof2 / prof123
+✅ 2 Professores 
 
-✅ 10 Estudantes → joao, maria, etc. / aluno123
+✅ 10 Estudantes 
 
 ✅ 4 Projetos de exemplo
 

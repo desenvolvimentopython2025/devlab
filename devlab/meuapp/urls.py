@@ -1,6 +1,9 @@
-from django.urls import path
+from django.urls import path,include
 from django.contrib.auth import views as auth_views
 from . import views
+from .models import Usuario # Importe seu modelo de usuário customizado
+from rest_framework import routers, serializers, viewsets
+
 urlpatterns = [
     # ============================================================
     # AUTENTICAÇÃO
@@ -80,4 +83,25 @@ urlpatterns = [
     path('solicitacoes-cadastro/<int:pk>/aprovar/', views.solicitacao_cadastro_aprovar, name='solicitacao_cadastro_aprovar'),
     path('solicitacoes-cadastro/<int:pk>/rejeitar/', views.solicitacao_cadastro_rejeitar, name='solicitacao_cadastro_rejeitar'),
       path('test-email/', views.test_email_view, name='test_email'),    
+]
+# Serializers define the API representation.
+class UsuarioSerializer(serializers.HyperlinkedModelSerializer): # Renomeado para UsuarioSerializer
+    class Meta:
+        model = Usuario # Use seu modelo Usuario
+        fields = ['url', 'username', 'email', 'is_staff']
+
+# ViewSets define the view behavior.
+class UsuarioViewSet(viewsets.ModelViewSet): # Renomeado para UsuarioViewSet
+    queryset = Usuario.objects.all() # Use seu modelo Usuario
+    serializer_class = UsuarioSerializer # Use seu UsuarioSerializer
+
+# Routers provide an easy way of automatically determining the URL conf.
+router = routers.DefaultRouter() # Mantenha o router como está
+router.register(r'usuarios', UsuarioViewSet) # Registre seu UsuarioViewSet
+
+# Wire up our API using automatic URL routing.
+# Additionally, we include login URLs for the browsable API.
+urlpatterns += [
+    path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

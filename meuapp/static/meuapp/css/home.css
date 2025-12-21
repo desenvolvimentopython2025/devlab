@@ -1,0 +1,32 @@
+/* Home Page Styles */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 5rem 0;
+    margin: -30px 0 3rem -15px;
+    margin-right: -15px;
+    border-radius: 0 0 20px 20px;
+}
+
+.feature-card {
+    border-radius: 12px;
+    border-left: 4px solid;
+}
+
+.feature-card.primary-border {
+    border-left-color: #0d6efd;
+}
+
+.feature-card.success-border {
+    border-left-color: #198754;
+}
+
+.feature-card.warning-border {
+    border-left-color: #ffc107;
+}
+
+.stats-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+}

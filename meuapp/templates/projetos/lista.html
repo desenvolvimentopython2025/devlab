@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Projetos — DevLab{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Projetos</h1>
+        {% if user.tipo == 'coordenador' %}
+        <a href="{% url 'projeto_criar' %}" class="btn btn-primary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-plus"></i>
+            </span>
+            <span class="text">Novo Projeto</span>
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Formulário de Busca -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'projeto_lista' %}" class="d-flex">
+                <input type="text" name="q" class="form-control me-2" placeholder="Buscar por título, cliente ou descrição..." value="{{ request.GET.q }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de Projetos -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Todos os Projetos</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Data de Início</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for projeto in projetos %}
+                        <tr>
+                            <td>{{ projeto.titulo }}</td>
+                            <td>{{ projeto.cliente }}</td>
+                            <td><span class="badge bg-secondary">{{ projeto.get_status_display }}</span></td>
+                            <td>{{ projeto.data_inicio|date:"d/m/Y" }}</td>
+                            <td>
+                                <a href="{% url 'projeto_detalhes' pk=projeto.pk %}" class="btn btn-info btn-sm">Ver Detalhes</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum projeto encontrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

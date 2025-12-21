@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Deletar Equipe - DevLab{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">⚠️ Confirmar Exclusão de Equipe</h5>
+            </div>
+            <div class="card-body">
+                <h4 class="mb-3">{{ equipe.nome }}</h4>
+                
+                <div class="alert alert-warning">
+                    <strong>Tem certeza que deseja deletar esta equipe?</strong>
+                </div>
+
+                <div class="mb-3">
+                    <p><strong>Projeto:</strong>
+                        {% if equipe.projeto %}
+                            {{ equipe.projeto.titulo }}
+                        {% else %}
+                            <span class="text-muted">Sem projeto</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Líder:</strong>
+                        {% if equipe.lider %}
+                            {{ equipe.lider.get_full_name|default:equipe.lider.username }}
+                        {% else %}
+                            <span class="text-muted">Não definido</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Membros:</strong> {{ equipe.total_membros }}</p>
+                    <p><strong>Criada em:</strong> {{ equipe.criada_em|date:"d/m/Y H:i" }}</p>
+                </div>
+
+                <div class="alert alert-danger">
+                    <strong>⛔ Esta ação não pode ser desfeita!</strong><br>
+                    A equipe será permanentemente removida do sistema.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'equipe_detalhes' equipe.pk %}" class="btn btn-secondary">
+                            ← Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <strong>Sim, Deletar Equipe</strong>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

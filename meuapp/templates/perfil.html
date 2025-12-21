@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Meu Perfil{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="mb-0">Meu Perfil</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush mb-4">
+                    <li class="list-group-item"><strong>Nome:</strong> {{ user.get_full_name }}</li>
+                    <li class="list-group-item"><strong>Usuário:</strong> {{ user.username }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+                    <li class="list-group-item"><strong>Tipo:</strong> <span class="badge bg-secondary">{{ user.get_tipo_display }}</span></li>
+                    {% if user.matricula %}
+                    <li class="list-group-item"><strong>Matrícula:</strong> {{ user.matricula }}</li>
+                    {% endif %}
+                    {% if user.cpf %}
+                    <li class="list-group-item"><strong>CPF:</strong> {{ user.cpf }}</li>
+                    {% endif %}
+                    {% if user.data_nascimento %}
+                    <li class="list-group-item"><strong>Data de Nascimento:</strong> {{ user.data_nascimento|date:"d/m/Y" }}</li>
+                    {% endif %}
+                    {% if user.funcao %}
+                    <li class="list-group-item"><strong>Função:</strong> {{ user.funcao }}</li>
+                    {% endif %}
+                </ul>
+
+                <h4 class="mb-3 mt-4">Alterar senha</h4>
+                <form method="post" action="{% url 'perfil' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_old_password" class="form-label">Senha atual</label>
+                        <input type="password" name="old_password" id="id_old_password" class="form-control" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_new_password1" class="form-label">Nova senha</label>
+                        <input type="password" name="new_password1" id="id_new_password1" class="form-control"
+                            required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_new_password2" class="form-label">Confirmar nova senha</label>
+                        <input type="password" name="new_password2" id="id_new_password2" class="form-control"
+                            required />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Alterar senha</button>
+                </form>
+
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary w-100 mt-3">Voltar ao Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

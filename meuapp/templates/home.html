@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-3 fw-bold text-white mb-3">DevLab Projects</h1>
+                <p class="lead text-white-50 mb-0">Plataforma de gerenciamento de projetos acadêmicos com
+                    funcionalidades completas de CRUD, autenticação segura e dashboards inteligentes.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="stats-box">
+                    <p class="text-white-50 small">Versão</p>
+                    <p class="text-white display-6 fw-bold">1.0.0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buttons Section -->
+<div class="container my-5">
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-10">
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a class="btn btn-primary btn-lg px-4" href="{% url 'login' %}" style="font-weight: 600;">
+                    <i class="bi bi-door-left"></i> Fazer login
+                </a>
+                <button class="btn btn-info btn-lg px-4" data-bs-toggle="modal" data-bs-target="#contatoModal"
+                    style="font-weight: 600; color: white;">
+                    <i class="bi bi-envelope-open"></i> Entrar em contato
+                </button>
+                <a class="btn btn-success btn-lg px-4" href="{% url 'visitante' %}" style="font-weight: 600;">
+                    <i class="bi bi-eye"></i> Ver projetos (visitante)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-3">Sobre o Sistema</h3>
+                    <p class="card-text text-muted mb-0">O <strong>DevLab Projects</strong> é uma plataforma
+                        desenvolvida para demonstrar boas práticas em desenvolvimento web, incluindo gerenciamento de
+                        usuários com diferentes níveis de acesso (coordenador, professor e estudante), CRUD completo de
+                        projetos e equipes, e dashboards customizados por tipo de usuário.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recentemente Aprovados Section -->
+    {% if solicitacoes_aprovadas %}
+    <div class="row mb-5">
+        <div class="col-md-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-3">🎉 Bem-vindos ao DevLab!</h3>
+                    <p class="card-text text-muted mb-4">Confira os últimos membros que se juntaram à nossa comunidade de desenvolvedores:</p>
+                    <div class="d-flex flex-wrap gap-3 justify-content-center">
+                        {% for solicitacao in solicitacoes_aprovadas %}
+                            {% with nome_partes=solicitacao.nome_completo.split %}
+                            <span class="badge bg-light text-dark p-3 rounded-pill shadow-sm">
+                                {{ nome_partes.0 }} 
+                                {% if nome_partes|length > 1 %}
+                                    {{ nome_partes.1|first }}.
+                                {% endif %}
+                            </span>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100 feature-card primary-border">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">🔒 Autenticação Segura</h5>
+                    <p class="card-text text-muted small">Acesso controlado por níveis de usuário com sessões seguras.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100 feature-card success-border">
+                <div class="card-body">
+                    <h5 class="card-title text-success">📊 Dashboards Inteligentes</h5>
+                    <p class="card-text text-muted small">Visualizações customizadas conforme o tipo de usuário.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100 feature-card warning-border">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #ff9800;">⚙️ CRUD Completo</h5>
+                    <p class="card-text text-muted small">Criar, ler, atualizar e deletar projetos e equipes facilmente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Contato -->
+<div class="modal fade" id="contatoModal" tabindex="-1" aria-labelledby="contatoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contatoModalLabel">Contato da Coordenação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <strong>Nome:</strong> {{ coordenacao.nome }}
+                    </div>
+                    <div>
+                        <strong>Email:</strong>
+                        <a href="mailto:{{ coordenacao.email }}?subject=Contato%20-%20DevLab">{{ coordenacao.email }}</a>
+                    </div>
+                    <div>
+                        <strong>Telefone:</strong> {{ coordenacao.telefone }}
+                    </div>
+                    <div>
+                        <strong>Local:</strong> {{ coordenacao.local }}
+                    </div>
+                    <div>
+                        <strong>Horário:</strong> {{ coordenacao.horario }}
+                    </div>
+                    <div class="text-muted small mt-2">Observação: contato fictício para demonstração.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

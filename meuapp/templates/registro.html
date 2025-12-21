@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Solicitar Cadastro - DevLab Projects{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'meuapp/css/registro.css' %}">
+{% endblock %}
+{% block content %}
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="registro-card">
+        <div class="registro-header">
+            <h2 class="mb-0 fw-bold">Solicitação de Cadastro</h2>
+            <p class="mb-0 opacity-90 small">Sua solicitação será analisada pela coordenação do DevLab.</p>
+        </div>
+        <div class="registro-body">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Nome Completo -->
+                <div class="mb-3">
+                    <label for="{{ form.nome_completo.id_for_label }}" class="form-label fw-bold">
+                        {{ form.nome_completo.label }}
+                    </label>
+                    {{ form.nome_completo }}
+                    {% if form.nome_completo.errors %}
+                    <div class="text-danger mt-1 small">
+                        {{ form.nome_completo.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                        {{ form.email.label }}
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="text-danger mt-1 small">
+                        {{ form.email.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Data de Nascimento -->
+                <div class="mb-3">
+                    <label for="{{ form.data_nascimento.id_for_label }}" class="form-label fw-bold">
+                        {{ form.data_nascimento.label }}
+                    </label>
+                    {{ form.data_nascimento }}
+                    {% if form.data_nascimento.errors %}
+                    <div class="text-danger mt-1 small">
+                        {{ form.data_nascimento.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Senha -->
+                <div class="mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                        {{ form.password1.label }}
+                    </label>
+                    {{ form.password1 }}
+                    <small class="text-muted d-block mt-1">
+                        A senha deve conter pelo menos 8 caracteres
+                    </small>
+                    {% if form.password1.errors %}
+                    <div class="text-danger mt-1 small">
+                        {{ form.password1.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Confirmação de Senha -->
+                <div class="mb-4">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                        {{ form.password2.label }}
+                    </label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                    <div class="text-danger mt-1 small">
+                        {{ form.password2.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Erros não-campo -->
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-3">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Botões -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn-registro btn-lg">
+                        Enviar Solicitação
+                    </button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <p class="mb-0 text-muted">
+                        Já tem cadastro?
+                        <a href="{% url 'login' %}" class="fw-bold text-primary">
+                            Faça login aqui
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+{% endblock %}

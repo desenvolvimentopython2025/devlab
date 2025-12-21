@@ -1,0 +1,244 @@
+{% extends 'base.html' %}
+
+{% block title %}Solicitação de Cadastro - DevLab Projects{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Navegação -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'solicitacoes_cadastro_lista' %}">Solicitações de Cadastro</a>
+            </li>
+            <li class="breadcrumb-item active">{{ solicitacao.nome_completo }}</li>
+        </ol>
+    </nav>
+
+    <!-- Cabeçalho com Status -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2>
+                <i class="fas fa-user-check"></i> {{ solicitacao.nome_completo }}
+            </h2>
+            <p class="text-muted">Detalhes da Solicitação de Cadastro</p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if solicitacao.status == 'pendente' %}
+            <span class="badge bg-warning fs-6">
+                <i class="fas fa-hourglass-half"></i> Pendente
+            </span>
+            {% elif solicitacao.status == 'aprovada' %}
+            <span class="badge bg-success fs-6">
+                <i class="fas fa-check-circle"></i> Aprovada
+            </span>
+            {% else %}
+            <span class="badge bg-danger fs-6">
+                <i class="fas fa-times-circle"></i> Rejeitada
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informações da Solicitação -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Informações Pessoais
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Nome Completo</p>
+                            <p class="fs-6 fw-bold">{{ solicitacao.nome_completo }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">E-mail</p>
+                            <p class="fs-6 fw-bold">
+                                <a href="mailto:{{ solicitacao.email }}">{{ solicitacao.email }}</a>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Data de Nascimento</p>
+                            <p class="fs-6 fw-bold">{{ solicitacao.data_nascimento|date:"d/m/Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Matrícula Atribuída</p>
+                            <p class="fs-6 fw-bold">
+                                <code class="bg-light p-2 rounded">{{ solicitacao.matricula }}</code>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações da Solicitação -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock"></i> Histórico
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Data de Solicitação</p>
+                            <p class="fs-6">{{ solicitacao.data_solicitacao|date:"d/m/Y \à\s H:i" }}</p>
+                        </div>
+                        {% if solicitacao.data_aprovacao %}
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Data de Aprovação</p>
+                            <p class="fs-6">{{ solicitacao.data_aprovacao|date:"d/m/Y \à\s H:i" }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if solicitacao.coordenador_aprovador %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="text-muted mb-1">Processado por</p>
+                            <p class="fs-6">{{ solicitacao.coordenador_aprovador.get_full_name }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Motivo de Rejeição (se houver) -->
+            {% if solicitacao.status == 'rejeitada' and solicitacao.motivo_rejeicao %}
+            <div class="alert alert-danger">
+                <h5>
+                    <i class="fas fa-ban"></i> Motivo da Rejeição
+                </h5>
+                <p class="mb-0">{{ solicitacao.motivo_rejeicao }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Painel de Ação -->
+        <div class="col-md-4">
+            {% if solicitacao.status == 'pendente' %}
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Processar Solicitação</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">
+                                Decisão
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                            <div class="text-danger mt-1 small">
+                                {{ form.status.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3" id="motivo-container" style="display: none;">
+                            <label for="{{ form.motivo_rejeicao.id_for_label }}" class="form-label fw-bold">
+                                Motivo da Rejeição
+                            </label>
+                            {{ form.motivo_rejeicao }}
+                            {% if form.motivo_rejeicao.errors %}
+                            <div class="text-danger mt-1 small">
+                                {{ form.motivo_rejeicao.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger mb-3">
+                            {{ form.non_field_errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check"></i> Processar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                const statusSelect = document.querySelector('[name="status"]');
+                const motivo_container = document.getElementById('motivo-container');
+
+                function toggleMotivoContainer() {
+                    if (statusSelect.value === 'rejeitada') {
+                        motivo_container.style.display = 'block';
+                    } else {
+                        motivo_container.style.display = 'none';
+                    }
+                }
+
+                statusSelect.addEventListener('change', toggleMotivoContainer);
+                toggleMotivoContainer(); // Verificar estado inicial
+            </script>
+            {% elif solicitacao.status == 'aprovada' %}
+            <div class="alert alert-success">
+                <h5>
+                    <i class="fas fa-check-circle"></i> Solicitação Aprovada
+                </h5>
+                <p class="mb-2">Esta solicitação foi aprovada e o usuário foi criado no sistema.</p>
+                <p class="mb-0 small text-muted">
+                    Username: <strong>{{ solicitacao.email|truncatewords:1 }}</strong>
+                </p>
+            </div>
+            {% else %}
+            <div class="alert alert-danger">
+                <h5>
+                    <i class="fas fa-times-circle"></i> Solicitação Rejeitada
+                </h5>
+                <p class="mb-0">Esta solicitação foi rejeitada pela coordenação.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Botão Voltar -->
+    <div class="row">
+        <div class="col-md-8">
+            <a href="{% url 'solicitacoes_cadastro_lista' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Voltar para Lista
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+    }
+
+    .card {
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-control,
+    .form-select {
+        border-color: #ddd;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+{% endblock %}

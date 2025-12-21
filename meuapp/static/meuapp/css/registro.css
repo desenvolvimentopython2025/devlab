@@ -1,0 +1,83 @@
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+.registro-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 420px;
+  width: 100%;
+  animation: slideUp 0.5s ease-out;
+  margin: 40px 0;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.registro-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 35px 30px 25px 30px;
+  text-align: center;
+  border-radius: 15px 15px 0 0;
+}
+
+.registro-body {
+  padding: 32px 28px 24px 28px;
+}
+
+.form-control {
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s;
+  font-size: 1.08rem;
+  background: #f8f9fa;
+}
+
+.form-control:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.15rem rgba(102, 126, 234, 0.18);
+  background: #fff;
+}
+
+.btn-registro {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  width: 100%;
+  padding: 14px;
+  font-weight: 600;
+  color: #fff;
+  border-radius: 10px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  font-size: 1.08rem;
+}
+
+.btn-registro:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(102, 126, 234, 0.18);
+}
+
+.alert {
+  border-radius: 10px;
+  border: none;
+  font-size: 0.98rem;
+}

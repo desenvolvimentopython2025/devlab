@@ -288,21 +288,54 @@ Páginas Públicas
 
 📁 Estrutura do Projeto
 
-            devlab-projects/
-            ├── devlab/
-            │   ├── settings.py
-            │   ├── urls.py
-            │   └── wsgi.py
-            ├── meuapp/
-            │   ├── models.py
-            │   ├── views.py
-            │   ├── forms.py
-            │   ├── urls.py
-            │   ├── admin.py
-            │   └── templates/
-            ├── manage.py
-            ├── db.sqlite3
-            └── requirements.txt
+    devlab/
+    ├── devlab/
+    │   ├── __pycache__/
+    │   ├── __init__.py
+    │   ├── asgi.py
+    │   ├── settings.py
+    │   ├── urls.py
+    │   └── wsgi.py
+    │
+    ├── meuapp/
+    │   ├── __pycache__/
+    │   ├── management/
+    │   ├── migrations/
+    │   ├── static/
+    │   ├── templates/
+    │   │   ├── equipes/
+    │   │   ├── projetos/
+    │   │   ├── registration/
+    │   │   ├── solicitacoes_cadastro/
+    │   │   └── usuarios/
+    │   │       ├── aluno.html
+    │   │       ├── base.html
+    │   │       ├── coordenador.html
+    │   │       ├── home.html
+    │   │       ├── login.html
+    │   │       ├── password_reset_basic.html
+    │   │       ├── password_reset_done.html
+    │   │       ├── password_reset_email.html
+    │   │       ├── perfil.html
+    │   │       ├── professor.html
+    │   │       ├── registro.html
+    │   │       └── visitante.html
+    │   │
+    │   ├── __init__.py
+    │   ├── admin.py
+    │   ├── apps.py
+    │   ├── forms.py
+    │   ├── models.py
+    │   ├── tests.py
+    │   ├── urls.py
+    │   └── views.py
+    │
+    ├── static/
+    ├── .env
+    ├── db.sqlite3
+    ├── manage.py
+    └── requirements.txt
+
 
 🆘 Solução de Problemas
 ❌ No module named 'django'
